@@ -1,0 +1,7 @@
+Payment,Success,Failed,Timeout,Success Rate
+COIN,5,1,0,83.33%
+NOTE,5,1,0,83.33%
+RFID,5,0,1,83.33%
+CARD,6,2,0,75.00%
+UPI,5,1,0,83.33%
+WALLET,5,0,0,100.00%

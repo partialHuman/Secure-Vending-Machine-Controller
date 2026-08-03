@@ -1,0 +1,60 @@
+============================================================
+      SECURE VENDING MACHINE VERIFICATION LOG
+============================================================
+Simulation Started
+
+[85000 ns] Test 1 : Controller in IDLE after Reset --> PASS
+[85000 ns] Test 2 : Balance = 0 after Reset --> PASS
+[85000 ns] Test 3 : Response Invalid after Reset --> PASS
+[205000 ns] Test 4 : Coin Payment --> PASS
+[325000 ns] Test 5 : Note Payment --> PASS
+[445000 ns] Test 6 : RFID Payment --> PASS
+[565000 ns] Test 7 : Card Payment --> PASS
+[685000 ns] Test 8 : UPI Payment --> PASS
+[805000 ns] Test 9 : Wallet Payment --> PASS
+[925000 ns] Test 10 : Mixed Seq - Coin --> PASS
+[1045000 ns] Test 11 : Mixed Seq - Card --> PASS
+[1165000 ns] Test 12 : Mixed Seq - UPI --> PASS
+[1285000 ns] Test 13 : Mixed Seq - RFID --> PASS
+[1405000 ns] Test 14 : Mixed Seq - Note --> PASS
+[1525000 ns] Test 15 : Mixed Seq - Wallet --> PASS
+[1645000 ns] Test 16 : Duplicate First Transaction --> PASS
+[1735000 ns] Test 17 : Duplicate Transaction --> PASS
+[1825000 ns] Test 18 : CRC Corruption --> PASS
+[1945000 ns] Test 19 : Stock Purchase 1 --> PASS
+[2065000 ns] Test 20 : Stock Purchase 2 --> PASS
+[2185000 ns] Test 21 : Stock Purchase 3 --> PASS
+[2305000 ns] Test 22 : Stock Purchase 4 --> PASS
+[2425000 ns] Test 23 : Stock Purchase 5 --> PASS
+[2545000 ns] Test 24 : Stock Purchase 6 --> PASS
+[2665000 ns] Test 25 : Stock Purchase 7 --> PASS
+[2785000 ns] Test 26 : Stock Purchase 8 --> PASS
+[2905000 ns] Test 27 : Stock Purchase 9 --> PASS
+[3025000 ns] Test 28 : Stock Purchase 10 --> PASS
+[3145000 ns] Test 29 : Stock Purchase 11 --> PASS
+[3265000 ns] Test 30 : Stock Purchase 12 --> PASS
+[3385000 ns] Test 31 : Stock Purchase 13 --> PASS
+[3505000 ns] Test 32 : Stock Purchase 14 --> PASS
+[3625000 ns] Test 33 : Stock Purchase 15 --> PASS
+[3745000 ns] Test 34 : Stock Purchase 16 --> PASS
+[3865000 ns] Test 35 : Stock Purchase 17 --> PASS
+[3985000 ns] Test 36 : Stock Purchase 18 --> PASS
+[4105000 ns] Test 37 : Stock Purchase 19 --> PASS
+[4225000 ns] Test 38 : Stock Purchase 20 --> PASS
+[4225000 ns] Test 39 : Inventory Product4 = 0 --> PASS
+[4345000 ns] Test 40 : Purchase After Stock Empty --> PASS
+[4665000 ns] Test 41 : Controller Returned to IDLE --> PASS
+[4935000 ns] Test 42 : Timeout Transaction --> PASS
+[4935000 ns] Test 43 : Final Balance = 0 --> PASS
+[4935000 ns] Test 44 : Controller Returned to IDLE --> PASS
+
+============================================================
+SIMULATION SUMMARY
+============================================================
+Total Tests      : 44
+Passed Tests     : 44
+Failed Tests     : 0
+Pass Percentage  : 100.00 %
+Simulation Time  : 4935000 ns
+============================================================
+Simulation Completed Successfully.
