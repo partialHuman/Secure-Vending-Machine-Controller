@@ -1,0 +1,55 @@
+======================================================================================================================================================================================================
+                                                                               SECURE VENDING MACHINE CONTROLLER
+                                                                              SYSTEMVERILOG DIRECTED VERIFICATION
+======================================================================================================================================================================================================
+Project,Secure Vending Machine Verification
+Verification Environment,Directed Self-Checking Testbench
+Payment Modes,"COIN, NOTE, RFID, CARD, UPI, WALLET"
+Total Test Cases,44
+======================================================================================================================================================================================================
+
+Test,Scenario,Time(ns),Latency(Cycles),TxnID,CRC,Payment,ProductID,QtyBefore,Price,Amount,Status,Error,Dispense,Refund,QtyAfter,Result
+1,"Controller in IDLE after Reset",85000,-,-,000-,-,-,0,-,-,"-","-",-,-,0,PASS
+2,"Balance = 0 after Reset",85000,-,-,000-,-,-,0,-,-,"-","-",-,-,0,PASS
+3,"Response Invalid after Reset",85000,-,-,000-,-,-,0,-,-,"-","-",-,-,0,PASS
+4,"Coin Payment",205000,12,1,0097,COIN,0,20,10,10,"TRANSACTION SUCCESS","NO ERROR",1,0,19,PASS
+5,"Note Payment",325000,12,2,0026,NOTE,1,20,20,20,"TRANSACTION SUCCESS","NO ERROR",1,0,19,PASS
+6,"RFID Payment",445000,12,3,00a0,RFID,2,20,30,30,"TRANSACTION SUCCESS","NO ERROR",1,0,19,PASS
+7,"Card Payment",565000,12,4,0043,CARD,3,20,40,40,"TRANSACTION SUCCESS","NO ERROR",1,0,19,PASS
+8,"UPI Payment",685000,12,5,00d5,UPI,4,20,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,19,PASS
+9,"Wallet Payment",805000,12,6,0071,WALLET,0,19,10,10,"TRANSACTION SUCCESS","NO ERROR",1,0,18,PASS
+10,"Mixed Seq - Coin",925000,12,7,0085,COIN,0,18,10,10,"TRANSACTION SUCCESS","NO ERROR",1,0,17,PASS
+11,"Mixed Seq - Card",1045000,12,8,00d8,CARD,1,19,20,20,"TRANSACTION SUCCESS","NO ERROR",1,0,18,PASS
+12,"Mixed Seq - UPI",1165000,12,9,00c9,UPI,2,19,30,30,"TRANSACTION SUCCESS","NO ERROR",1,0,18,PASS
+13,"Mixed Seq - RFID",1285000,12,10,000d,RFID,3,19,40,40,"TRANSACTION SUCCESS","NO ERROR",1,0,18,PASS
+14,"Mixed Seq - Note",1405000,12,11,000c,NOTE,4,19,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,18,PASS
+15,"Mixed Seq - Wallet",1525000,12,12,0047,WALLET,0,17,10,10,"TRANSACTION SUCCESS","NO ERROR",1,0,16,PASS
+16,"Duplicate First Transaction",1645000,12,100,0007,CARD,0,16,10,10,"TRANSACTION SUCCESS","NO ERROR",1,0,15,PASS
+17,"Duplicate Transaction",1735000,9,100,0007,CARD,0,15,10,10,"TRANSACTION FAILED","DUPLICATE TRANSACTION",0,0,15,PASS
+18,"CRC Corruption",1825000,9,100,0007,UPI,0,15,10,10,"TRANSACTION FAILED","CRC ERROR",0,0,15,PASS
+19,"Stock Purchase 1",1945000,12,101,0065,COIN,4,18,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,17,PASS
+20,"Stock Purchase 2",2065000,12,102,0008,NOTE,4,17,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,16,PASS
+21,"Stock Purchase 3",2185000,12,103,00a3,RFID,4,16,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,15,PASS
+22,"Stock Purchase 4",2305000,12,104,00ea,CARD,4,15,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,14,PASS
+23,"Stock Purchase 5",2425000,12,105,00d6,UPI,4,14,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,13,PASS
+24,"Stock Purchase 6",2545000,12,106,00bb,WALLET,4,13,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,12,PASS
+25,"Stock Purchase 7",2665000,12,107,004f,COIN,4,12,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,11,PASS
+26,"Stock Purchase 8",2785000,12,108,003e,NOTE,4,11,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,10,PASS
+27,"Stock Purchase 9",2905000,12,109,0095,RFID,4,10,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,9,PASS
+28,"Stock Purchase 10",3025000,12,110,00f8,CARD,4,9,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,8,PASS
+29,"Stock Purchase 11",3145000,12,111,00c4,UPI,4,8,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,7,PASS
+30,"Stock Purchase 12",3265000,12,112,00fd,WALLET,4,7,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,6,PASS
+31,"Stock Purchase 13",3385000,12,113,0009,COIN,4,6,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,5,PASS
+32,"Stock Purchase 14",3505000,12,114,0064,NOTE,4,5,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,4,PASS
+33,"Stock Purchase 15",3625000,12,115,00cf,RFID,4,4,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,3,PASS
+34,"Stock Purchase 16",3745000,12,116,00be,CARD,4,3,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,2,PASS
+35,"Stock Purchase 17",3865000,12,117,0082,UPI,4,2,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,1,PASS
+36,"Stock Purchase 18",3985000,12,118,00ef,WALLET,4,1,50,50,"TRANSACTION SUCCESS","NO ERROR",1,0,0,PASS
+37,"Stock Purchase 19",4105000,12,119,001b,COIN,4,0,50,50,"TRANSACTION FAILED","OUT OF STOCK",0,50,0,PASS
+38,"Stock Purchase 20",4225000,12,120,0052,NOTE,4,0,50,50,"TRANSACTION FAILED","OUT OF STOCK",0,50,0,PASS
+39,"Inventory Product4 = 0",4225000,-,-,000-,-,-,0,-,-,"-","-",-,-,0,PASS
+40,"Purchase After Stock Empty",4345000,12,121,009d,CARD,4,0,50,50,"TRANSACTION FAILED","OUT OF STOCK",0,50,0,PASS
+41,"Controller Returned to IDLE",4665000,-,-,000-,-,-,0,-,-,"-","-",-,-,0,PASS
+42,"Timeout Transaction",4935000,27,124,002b,RFID,0,15,10,10,"TRANSACTION TIMEOUT","TRANSACTION TIMEOUT",0,0,15,PASS
+43,"Final Balance = 0",4935000,-,-,000-,-,-,0,-,-,"-","-",-,-,0,PASS
+44,"Controller Returned to IDLE",4935000,-,-,000-,-,-,0,-,-,"-","-",-,-,0,PASS

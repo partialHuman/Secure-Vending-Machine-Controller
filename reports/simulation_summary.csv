@@ -1,0 +1,9 @@
+Metric,Value
+Total Tests,44
+Passed Tests,44
+Failed Tests,0
+Pass Percentage,100.00%
+Simulation Time(ns),4935000
+Average Latency,12.24
+Maximum Latency,27
+Minimum Latency,9

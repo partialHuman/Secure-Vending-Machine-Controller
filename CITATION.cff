@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+
+title: "Secure Vending Machine Controller"
+
+message: >
+  If you use this project in your research, publication,
+  or academic work, please cite this repository.
+
+type: software
+
+authors:
+  - family-names: Moga
+    given-names: Dhrumil
+
+version: "1.0.0"
+
+date-released: 2026-08-04
+
+license: MIT
+
+abstract: >
+  A modular SystemVerilog implementation and directed self-checking
+  verification environment for a Secure Vending Machine Controller
+  supporting multiple payment methods, transaction validation,
+  inventory management, timeout detection, and automated report
+  generation.
+
+keywords:
+  - SystemVerilog
+  - RTL Design
+  - Verification
+  - VLSI
+  - ASIC
+  - FPGA
+  - Digital Design
+  - Vivado
+  - XSIM
+  - Self-Checking Testbench
+  - Vending Machine
+
+repository-code: "https://github.com/partialHuman/Secure-Vending-Machine-Controller"
+
+url: "https://github.com/partialHuman/Secure-Vending-Machine-Controller"
+
+language: en

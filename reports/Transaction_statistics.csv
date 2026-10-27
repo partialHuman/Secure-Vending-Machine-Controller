@@ -1,0 +1,8 @@
+Error Type,Count
+Successful Transactions,31
+Total Unuccessful Transactions,6
+Insufficient Balance,0
+CRC Error,1
+Duplicate Transaction,1
+Timeout,1
+Out of Stock,3

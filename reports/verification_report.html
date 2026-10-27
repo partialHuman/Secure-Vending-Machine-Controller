@@ -1,0 +1,47 @@
+<html>
+<head><title>Verification Report</title></head>
+<body style="font-family:Arial">
+<h1 align="center">Secure Vending Machine Verification Report</h1>
+<hr>
+<h2>Simulation Summary</h2>
+<table border="1" cellpadding="5">
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Total Tests</td><td>44</td></tr>
+<tr><td>Passed Tests</td><td>44</td></tr>
+<tr><td>Failed Tests</td><td>0</td></tr>
+<tr><td>Pass Percentage</td><td>100.00 %</td></tr>
+</table><br>
+<h2>Transaction Statistics</h2>
+<table border="1" cellpadding="5">
+<tr><th>Transactions</th><th>Count</th><th>Error Rate</th></tr>
+<tr><td>Successful Transactions</td><td>31</td></tr>
+<tr><td>Insufficient Balance</td><td>0</td><td>0.00%</td></tr>
+<tr><td>CRC Error</td><td>1</td><td>16.67%</td></tr>
+<tr><td>Duplicate</td><td>1</td><td>16.67%</td></tr>
+<tr><td>Timeout</td><td>1</td><td>16.67%</td></tr>
+<tr><td>Out of Stock</td><td>3</td><td>50.00%</td></tr>
+<tr><td>Total Transactions</td><td>37</td><td>100.00%</td></tr>
+</table>
+<h2>Final Inventory Status</h2>
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th>Product ID</th><th>Price</th><th>Remaining Quantity</th><th>Status</th></tr>
+<tr><td>0</td><td>10</td><td>15</td><td><font color="green">AVAILABLE</font></td></tr>
+<tr><td>1</td><td>20</td><td>17</td><td><font color="green">AVAILABLE</font></td></tr>
+<tr><td>2</td><td>30</td><td>18</td><td><font color="green">AVAILABLE</font></td></tr>
+<tr><td>3</td><td>40</td><td>18</td><td><font color="green">AVAILABLE</font></td></tr>
+<tr><td>4</td><td>50</td><td>0</td><td><font color="red"><b>OUT OF STOCK</b></font></td></tr>
+</table><br>
+<h2>Payment Method Statistics</h2>
+<table border="1" cellpadding="5">
+<tr><th>Payment</th><th>Success</th><th>Failed</th><th>Timeout</th><th>Success Rate</th></tr>
+<tr><td>COIN</td><td>5</td><td>1</td><td>0</td><td>83.33%</td></tr>
+<tr><td>NOTE</td><td>5</td><td>1</td><td>0</td><td>83.33%</td></tr>
+<tr><td>RFID</td><td>5</td><td>0</td><td>1</td><td>83.33%</td></tr>
+<tr><td>CARD</td><td>6</td><td>2</td><td>0</td><td>75.00%</td></tr>
+<tr><td>UPI</td><td>5</td><td>1</td><td>0</td><td>83.33%</td></tr>
+<tr><td>WALLET</td><td>5</td><td>0</td><td>0</td><td>100.00%</td></tr>
+</table><br>
+<hr>
+<center><b>Verification Completed Successfully</b></center>
+</body>
+</html>

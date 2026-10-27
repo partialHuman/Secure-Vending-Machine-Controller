@@ -1,0 +1,15 @@
+Feature,Status,Test Case
+Reset Verification,PASS,Reset Test
+Coin Payment,PASS,Coin Payment Test
+Note Payment,PASS,Note Payment Test
+RFID Payment,PASS,RFID Payment Test
+Card Payment,PASS,Card Payment Test
+UPI Payment,PASS,UPI Payment Test
+Wallet Payment,PASS,Wallet Payment Test
+Mixed Transactions,PASS,Mixed Payment Test
+Duplicate Transaction Detection,PASS,Duplicate Transaction Test
+CRC Error Detection,PASS,CRC Corruption Test
+Inventory Decrement,PASS,Inventory Update Test
+Out of Stock Detection,PASS,Stock Empty Test
+Timeout Detection,PASS,Timeout Test
+Back-to-Back Transactions,PASS,Back-to-Back Test
