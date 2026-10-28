@@ -87,11 +87,11 @@ Contains reports generated automatically after simulation.
 
 ```text
 reports/
-├── mixed_payment_report.csv
+├── multi_payment_report.csv
 ├── simulation_summary.csv
 ├── payment_statistics.csv
 ├── inventory_report.csv
-├── error_statistics.csv
+├── Transaction_statistics.csv
 ├── verification_report.html
 └── simulation.log
 ```
@@ -100,11 +100,11 @@ reports/
 
 | Report | Purpose |
 |---------|---------|
-| mixed_payment_report.csv | Transaction-by-transaction results |
+| multi_payment_report.csv | Transaction-by-transaction results |
 | simulation_summary.csv | Overall simulation statistics |
 | payment_statistics.csv | Payment method analysis |
 | inventory_report.csv | Final inventory state |
-| error_statistics.csv | Distribution of detected errors |
+| Transaction_statistics.csv | Distribution of detected errors |
 | verification_report.html | Browser-viewable verification summary |
 | simulation.log | Simulation execution log |
 

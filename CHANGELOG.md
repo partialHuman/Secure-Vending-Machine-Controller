@@ -6,6 +6,23 @@ The format follows a chronological version history.
 
 ---
 
+# Version 1.0.1 (Audit Fixes & Hardening)
+
+### RTL Hardening
+- Added top-level `request_ready` signal and documented Option A valid/ready handshake contract.
+- Added synchronous reset gating (`!rst`) to `request_ready` to prevent transaction admission during reset.
+- Maintained single-outstanding-transaction gate in `rtl/top.sv` to protect level-sensitive `security_engine` against pipeline contention.
+
+### Verification Environment Upgrades
+- Upgraded testbench request drivers (`tb_mixed_payment`, `tb_coin_only`, `tb_card_only`) to strictly follow Option A handshake with finite watchdogs.
+- Replaced unverified back-to-back tests with directed contention suite (Subtests 13A, 13B, 13C, 13D, 13E) validating in-flight contention, payload stability, responses, and inventory decrements.
+- Replaced mutable request bus reading with dedicated `active_txn_t` scoreboard tracking in all testbenches.
+- Added dedicated security testbench `tb/tb_handshake_security.sv` (56 checks) covering Option A contract, contention, `ERR_AUTH`, `ERR_INVALID_PRODUCT`, and `ERR_BALANCE`.
+- Added testbench failure accounting (`tb_errors`, `cat_fail`, `tb_fail`) and standardized exit markers (`SVM_TB_RESULT: PASS/FAIL`).
+- Integrated one-command regression script `scripts/run_regression.tcl` executing all four testbenches (327 checks total, 100% pass).
+
+---
+
 # Version 1.0.0
 
 ## Initial Public Release
@@ -73,11 +90,11 @@ Implemented verification for:
 
 Automatically generated reports include:
 
-- mixed_payment_report.csv
+- multi_payment_report.csv
 - simulation_summary.csv
 - payment_statistics.csv
 - inventory_report.csv
-- error_statistics.csv
+- Transaction_statistics.csv
 - verification_report.html
 - simulation.log
 
