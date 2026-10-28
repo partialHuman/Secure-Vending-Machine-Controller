@@ -1,5 +1,5 @@
 puts "==========================================="
-puts "Compiling RTL and Testbench"
+puts "Compiling RTL and Testbenches"
 puts "==========================================="
 
 # Create work library
@@ -11,6 +11,7 @@ if {![file exists work]} {
 xvlog ../rtl/transaction_pkg.sv
 
 # Compile RTL
+xvlog ../rtl/crc8.sv
 xvlog ../rtl/payment_interface.sv
 xvlog ../rtl/payment_arbiter.sv
 xvlog ../rtl/security_engine.sv
@@ -21,7 +22,10 @@ xvlog ../rtl/transaction_controller.sv
 xvlog ../rtl/response_generator.sv
 xvlog ../rtl/top.sv
 
-# Compile Testbench
+# Compile Testbenches
 xvlog ../tb/tb_mixed_payment.sv
+xvlog ../tb/tb_coin_only.sv
+xvlog ../tb/tb_card_only.sv
+xvlog ../tb/tb_handshake_security.sv
 
 puts "Compilation Complete"

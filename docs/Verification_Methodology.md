@@ -1,261 +1,103 @@
-# Verification Methodology
+# Verification Methodology — v1.0.1 Post-Audit Hardening
 
 ## Overview
 
-The Secure Vending Machine Controller was verified using a **SystemVerilog directed self-checking verification environment**. The verification strategy focuses on validating all functional requirements of the controller by executing predefined test scenarios and automatically comparing the expected and actual outputs.
+The Secure Vending Machine Controller was verified using an upgraded **SystemVerilog directed self-checking verification environment**. Following a hardware security audit, the verification strategy was significantly hardened to validate the **Option A Valid/Ready Handshake Protocol**, ensure robust **response-to-request transaction tracking**, verify **pipeline immunity under in-flight contention**, and detect edge-case security vulnerabilities.
 
-The testbench generates transaction requests, monitors DUT responses, performs automatic result checking, collects verification statistics, and generates multiple verification reports.
+The verification environment automatically executes predefined and contention scenarios, validates DUT responses against an active transaction scoreboard, evaluates SystemVerilog assertions, collects performance statistics, and generates detailed verification reports.
 
 ---
 
-# Verification Environment
+# 1. Handshake Protocol & Driver Methodology (Option A)
 
-```mermaid
-flowchart LR
+The v1.0.1 architecture establishes an explicit valid/ready request handshake at the top level:
 
-    A[Test Cases]
+- **Signal Definition:**
+  - `request_valid`: Driven by the requester.
+  - `request_ready`: Driven by the controller.
+- **Contract:**
+  A request transaction transfer occurs strictly on the rising clock edge (`posedge clk`) where **both `request_valid` and `request_ready` are asserted (`1'b1`)**.
+- **Driver Rules:**
+  1. Stimulus is driven half a clock period ahead of the clock edge (on `negedge clk`).
+  2. While `request_ready == 0`, the driver holds `request_valid == 1` and preserves all request payload fields (`payment_type`, `amount`, `product_id`) unchanged.
+  3. The driver asserts a finite timeout watchdog (100 clock cycles) to detect deadlocks.
+  4. Upon observing the accepting edge (`posedge clk iff request_ready`), the driver immediately deasserts `request_valid = 1'b0` on the subsequent `negedge clk` to prevent unintended duplicate transaction initiation.
 
-    B[Transaction Generator]
+---
 
-    C[Driver]
+# 2. Response-to-Request Association & Scoreboard
 
-    D[Secure Vending Machine DUT]
+Previous testbench revisions suffered from a data race: `wait_response` and `check_result` read `request.product_id` and `request.amount` directly off the input request bus when a response arrived. If the driver had already placed a new pending request on the bus, the response checker compared against the wrong transaction.
 
-    E[Monitor]
+### Active Transaction Tracking Architecture
+```systemverilog
+typedef struct packed {
+    payment_t                       payment_type;
+    logic [BALANCE_WIDTH-1:0]       amount;
+    logic [PRODUCT_ID_WIDTH-1:0]    product_id;
+    logic [31:0]                    inv_before;
+    logic [BALANCE_WIDTH-1:0]       bal_before;
+} active_txn_t;
 
-    F[Self-Checker]
-
-    G[Assertions]
-
-    H[CSV / HTML Reports]
-
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> H
-    G --> F
+active_txn_t active_txn;
 ```
 
----
-
-# Verification Components
-
-## Transaction Generator
-
-Generates transaction packets for different payment methods.
-
-Supported payment methods:
-
-- COIN
-- NOTE
-- RFID
-- CARD
-- UPI
-- WALLET
-
-Each transaction includes:
-
-- Transaction ID
-- Payment Type
-- Product ID
-- Payment Amount
-- CRC
+- **Sampling:** On the exact accepting clock edge (`request_valid && request_ready`), `active_txn` captures the transaction payload along with the pre-transaction inventory (`qty_mem`) and balance (`current_balance`).
+- **Isolation:** The response checker evaluates `resp.status`, `resp.error`, `resp.dispense`, `resp.refund`, and inventory decrement strictly against `active_txn`.
+- **Response Clearing:** On entry to `wait_response`, `resp` is zero-initialized and trailing `response_valid` pulses from preceding cycles are flushed (`while (response_valid) @(posedge clk);`), eliminating stale data reuse.
 
 ---
 
-## Driver
+# 3. Directed Contention Test Suite (Category 13)
 
-The driver applies generated transactions to the DUT through the request interface.
+To validate pipeline robustness and resolve audit finding F-01, five directed subtests were implemented:
 
-Responsibilities:
-
-- Drive transaction request
-- Apply valid signal
-- Wait for DUT acceptance
-- Synchronize with system clock
-
----
-
-## Device Under Test (DUT)
-
-The DUT consists of the following RTL modules:
-
-- Payment Interface
-- Payment Arbiter
-- Security Engine
-- Balance Manager
-- Inventory Manager
-- Timeout Controller
-- Transaction Controller
-- Response Generator
+1. **Subtest 13A (Baseline Handshake):**
+   Submits an ordinary transaction; verifies exactly one acceptance event; verifies response, inventory decrement, and return to IDLE.
+2. **Subtest 13B (In-Flight Contention):**
+   Submits Txn 1 (CARD, 20, P1); while Txn 1 is in-flight, presents distinct Txn 2 (UPI, 30, P2); verifies `request_ready == 0` throughout execution; asserts that Txn 2 is not admitted into `payment_interface`; verifies Txn 1 completes cleanly; observes Txn 2 accepted on return to IDLE; verifies both responses and independent inventory updates.
+3. **Subtest 13C (Multiple Sequential Contention Requests):**
+   Sequentially exercises WALLET (P3), NOTE (P0), and RFID (P1); validates that each transaction executes with exactly one acceptance, one dispense, and correct inventory decrement.
+4. **Subtest 13D (Payload Stability and Loss Checks):**
+   Starts background transaction (COIN P0); presents blocked request (CARD P1) with `request_valid == 1` while `request_ready == 0`; checks payload stability across clock cycles; verifies that the blocked request is not lost and is accepted upon background completion.
+5. **Subtest 13E (Reset and Recovery):**
+   Verifies `request_ready == 0` during active reset; tests mid-transaction reset (balance cleared, controller forced to IDLE); verifies clean recovery transaction immediately post-reset.
 
 ---
 
-## Monitor
+# 4. Dedicated Security Testbench (`tb_handshake_security.sv`)
 
-The monitor observes DUT outputs without modifying DUT behavior.
-
-Captured signals include:
-
-- Transaction Status
-- Error Code
-- Dispense Signal
-- Refund Amount
-- Inventory Update
+A standalone self-checking security testbench verifies design-level security rules:
+- **Reset Gating:** No request accepted while `rst == 1`.
+- **In-Flight Contention:** Level-sensitive security engine immunity (no duplicate error false-triggers).
+- **Security Rule `ERR_AUTH`:** CARD transactions with amount > 5000 rejected with `ERR_AUTH`.
+- **Security Rule `ERR_INVALID_PRODUCT`:** Requests with `product_id >= PRODUCT_COUNT` (5) rejected with `ERR_INVALID_PRODUCT`.
+- **Security Rule `ERR_BALANCE`:** Requests with `amount == 0` rejected with `ERR_BALANCE`.
+- **Recovery:** Clean transaction recovery after aborted transactions.
 
 ---
 
-## Self-Checking Mechanism
+# 5. Regression Suite Execution
 
-The verification environment automatically compares the DUT response against the expected result.
+The test suite is automated via `scripts/run_regression.tcl`.
 
-Checks performed:
-
-- Correct transaction status
-- Correct error code
-- Correct dispense signal
-- Correct refund amount
-- Correct inventory update
-- Correct balance update
-
-Each test is reported as:
-
-- PASS
-- FAIL
-
----
-
-## Assertions
-
-SystemVerilog assertions are used to validate critical DUT behavior during simulation.
-
-Assertions include:
-
-- Inventory decrement after successful dispense
-- Balance cleared after transaction completion
-- No unknown values on response outputs
-- Legal transaction completion
-
----
-
-# Verification Flow
-
-```mermaid
-flowchart TD
-
-Start[Start Simulation]
-
-Start --> Reset
-
-Reset --> Generate
-
-Generate[Generate Transaction]
-
-Generate --> Drive
-
-Drive[Apply Request to DUT]
-
-Drive --> DUT
-
-DUT --> Monitor
-
-Monitor --> Compare
-
-Compare{Expected == Actual?}
-
-Compare -- Yes --> Pass
-
-Compare -- No --> Fail
-
-Pass --> Next
-
-Fail --> Next
-
-Next{More Tests?}
-
-Next -- Yes --> Generate
-
-Next -- No --> Reports
-
-Reports --> Finish
+```bash
+vivado -mode batch -source scripts/run_regression.tcl
 ```
 
----
+### Regression Summary
 
-# Test Categories
+```text
+================ REGRESSION SUMMARY ================
+tb_mixed_payment      PASS  SVM_TB_RESULT: PASS total=69 passed=69 failed=0 tb_errors=0
+tb_coin_only          PASS  SVM_TB_RESULT: PASS total=101 passed=101 failed=0 tb_errors=0
+tb_card_only          PASS  SVM_TB_RESULT: PASS total=101 passed=101 failed=0 tb_errors=0
+tb_handshake_security PASS  SVM_TB_RESULT: PASS total=56 passed=56 failed=0 tb_errors=0
+====================================================
+RESULT: PASS
+```
 
-The verification suite includes the following directed tests.
-
-| Test Category | Purpose |
-|--------------|---------|
-| Reset | Verify DUT initialization |
-| Coin Payment | Validate coin transaction |
-| Note Payment | Validate note transaction |
-| RFID Payment | Validate RFID transaction |
-| Card Payment | Validate card transaction |
-| UPI Payment | Validate UPI transaction |
-| Wallet Payment | Validate wallet transaction |
-| Mixed Transactions | Verify multiple payment modes |
-| Duplicate Transaction | Verify duplicate ID detection |
-| CRC Error | Verify CRC checking |
-| Timeout | Verify timeout handling |
-| Stock Depletion | Verify inventory decrement |
-| Out of Stock | Verify stock error |
-| Back-to-Back Transactions | Verify consecutive requests |
-
----
-
-# Verification Reports
-
-The verification environment automatically generates:
-
-- mixed_payment_report.csv
-- simulation_summary.csv
-- payment_statistics.csv
-- inventory_report.csv
-- error_statistics.csv
-- verification_report.html
-- simulation.log
-
-These reports provide transaction logs, simulation statistics, inventory status, payment analysis, latency information, and error distribution.
-
----
-
-# Verification Features
-
-- Directed verification methodology
-- Self-checking testbench
-- Automatic pass/fail reporting
-- SystemVerilog assertions
-- CSV report generation
-- HTML report generation
-- Simulation logging
-- Latency measurement
-- Inventory verification
-- Payment statistics
-- Error statistics
-
----
-
-# Verification Summary
-
-| Item | Description |
-|------|-------------|
-| Verification Language | SystemVerilog |
-| Verification Style | Directed Self-Checking |
-| Simulator | Vivado XSIM |
-| Assertions | Yes |
-| Functional Coverage | No |
-| CSV Reports | Yes |
-| HTML Report | Yes |
-| Simulation Log | Yes |
-| Test Cases | 44 |
-| Pass Rate | 100% |
-
----
-
-# Conclusion
-
-The Secure Vending Machine Controller was verified using a directed self-checking verification methodology. The environment automatically applies transaction scenarios, validates DUT responses, checks internal functionality using assertions, and generates comprehensive verification reports. This methodology ensures that all implemented features—including payment processing, security checks, balance management, inventory updates, timeout handling, and response generation—are verified in a repeatable and automated manner.
+- Total checks across regression: **327**
+- Total failures: **0**
+- Testbench errors: **0**
+- Overall pass rate: **100%**

@@ -12,7 +12,17 @@
 .sim/
 .tmp/
 .xil/
+.Xil/
+build/
+work/
 .gen/
+
+########################################################
+# Ephemeral Root Simulation Reports
+########################################################
+# Canonical reference reports are kept under reports/
+/*.csv
+/*.html
 
 ########################################################
 # Vivado Project Generated Files

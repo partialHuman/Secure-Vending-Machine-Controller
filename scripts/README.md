@@ -15,44 +15,14 @@ Runs the complete flow:
 
 # How to Run
 
-From the Vivado Tcl Console:
+```bash
+vivado -mode batch -source scripts/run_regression.tcl
 ```
-cd scripts
-source run_all.tcl
-```
-or from the terminal:
-```
-vivado -mode tcl -source scripts/run_all.tcl
-```
----
-# Expected Output
-```
-=========================================
-Secure Vending Machine Verification
-=========================================
 
-Compiling RTL...
-✓ transaction_pkg.sv
-✓ payment_interface.sv
-✓ payment_arbiter.sv
-✓ ...
-✓ tb_mixed_payment.sv
+Compiles all RTL (including `crc8.sv`), then compiles/elaborates/runs each testbench
+(`tb_mixed_payment`, `tb_coin_only`, `tb_card_only`), and exits non-zero unless every
+testbench prints `SVM_TB_RESULT: PASS`. Logs and reports are written under `build/`.
+Select testbenches with `SVM_TBS="tb_mixed_payment"`.
 
-Compilation Complete
-
-Launching Simulation...
-
-Running...
-
-44 / 44 Tests Passed
-
-CSV Reports Generated
-HTML Report Generated
-Simulation Log Generated
-
-Simulation Finished
-
-=========================================
-Verification Complete
-=========================================
-```
+`compile.tcl`, `simulate.tcl`, `run_all.tcl` are the legacy flow and must be run from the
+`scripts/` directory.

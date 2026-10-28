@@ -2,7 +2,7 @@
 
 ## Secure Vending Machine Controller
 
-Version: 1.0
+Version: 1.0.1 (Post-Audit Hardened)
 
 ---
 
@@ -10,9 +10,9 @@ Version: 1.0
 
 ## Purpose
 
-This document specifies the communication protocol used by the Secure Vending Machine Controller. It defines the request interface, transaction packet format, response packet format, timing requirements, supported payment methods, status codes, and error codes used during transaction processing.
+This document specifies the communication protocol used by the Secure Vending Machine Controller (`v1.0.1`). It defines the top-level valid/ready request handshake (Option A), transaction packet format, response packet format, timing requirements, supported payment methods, status codes, and error codes used during transaction processing.
 
-The protocol enables a host system or user interface to communicate with the controller using a standardized transaction format.
+The protocol enables a host system or user interface to communicate with the controller using a standardized, secure transaction format with explicit back-pressure gating.
 
 ---
 
@@ -20,337 +20,153 @@ The protocol enables a host system or user interface to communicate with the con
 
 ```mermaid
 flowchart LR
-Host[Host System] -- payment_request_t<br/>request_valid -->
-DUT[Secure Vending Machine Controller]
-DUT -- response_packet_t<br/>response_valid --> 
-T[Transaction Response]
-
+    Host[Host System] -- "payment_request_t<br/>request_valid" --> DUT[Secure Vending Machine Controller]
+    DUT -- "request_ready" --> Host
+    DUT -- "response_packet_t<br/>response_valid" --> Host
 ```
+
 ---
 
 # 3. Request Interface
 
-## Input Signals
+## Top-Level Signals
 
 | Signal | Width | Direction | Description |
-|---------|------:|-----------|-------------|
-| clk | 1 | Input | System clock |
-| rst | 1 | Input | Active-high synchronous reset |
-| request_valid | 1 | Input | Indicates a valid request |
-| request | Structured | Input | Payment request |
+|---|---:|---|---|
+| `clk` | 1 | Input | System clock |
+| `rst` | 1 | Input | Active-high synchronous reset |
+| `request_valid` | 1 | Input | Indicates a valid payment request is presented |
+| `request` | 24 | Input | Structured payment request payload |
+| `request_ready` | 1 | Output | Indicates controller is ready to accept a new request |
+| `response` | 32 | Output | Structured transaction response packet |
+| `response_valid` | 1 | Output | Single-cycle pulse indicating response availability |
 
 ---
 
-# 4. Payment Request Format
+# 4. Valid/Ready Handshake Contract (Option A)
+
+The Secure Vending Machine Controller enforces a strict **Option A Valid/Ready Handshake Contract**:
+
+1. **Acceptance Event:**
+   A request is accepted if and only if **both `request_valid` and `request_ready` are asserted (`1'b1`) on the rising edge of `clk` (`posedge clk`)**.
+2. **Requester Obligations:**
+   - The requester asserts `request_valid` and drives the payload `request` (typically on `negedge clk` half a period prior to the clock edge).
+   - If `request_ready == 0`, the requester **must maintain `request_valid == 1` and keep all request fields (`payment_type`, `amount`, `product_id`) completely stable**.
+   - The requester shall deassert `request_valid` only after observing the accepting clock edge where `request_valid && request_ready == 1`.
+3. **Controller Readiness Gate:**
+   To protect the downstream pipeline (`payment_arbiter`, `security_engine`, `transaction_controller`, resource managers) against concurrent packet corruption or level-sensitive race conditions, `request_ready` is gated as:
+   ```systemverilog
+   assign request_ready = !rst
+                        && controller_ready   // FSM in IDLE
+                        && !packet_valid     // payment_interface empty
+                        && !out_valid        // arbiter empty
+                        && !security_done;   // security_engine idle
+   ```
+4. **Reset Behavior:**
+   During synchronous reset (`rst == 1`), `request_ready` is driven to `0`. No transactions are admitted into the pipeline during reset.
+
+---
+
+# 5. Payment Request Format
 
 ```systemverilog
 typedef struct packed
 {
-    payment_t payment_type;
-    logic [15:0] amount;
-    logic [4:0] product_id;
+    payment_t                    payment_type;
+    logic [BALANCE_WIDTH-1:0]    amount;
+    logic [PRODUCT_ID_WIDTH-1:0] product_id;
 } payment_request_t;
 ```
-
----
 
 ## Fields
 
 | Field | Width | Description |
-|--------|------:|-------------|
-| payment_type | 3 bits | Payment method |
-| amount | 16 bits | Payment amount |
-| product_id | 5 bits | Selected product |
+|---|---:|---|
+| `payment_type` | 3 bits | Payment method enum (COIN, NOTE, RFID, CARD, UPI, WALLET) |
+| `amount` | 16 bits | Payment amount tendered |
+| `product_id` | 5 bits | Selected product index (0 to `PRODUCT_COUNT-1`) |
 
 ---
 
-# 5. Supported Payment Types
+# 6. Supported Payment Types
 
-| Value | Payment |
-|-------:|---------|
-| 0 | Coin |
-| 1 | Note |
-| 2 | RFID |
-| 3 | Card |
-| 4 | UPI |
-| 5 | Wallet |
+| Enum Value | Identifier | Payment Method | Specific Constraints |
+|---:|---|---|---|
+| `3'd0` | `COIN` | Coin Validator | Standard physical currency |
+| `3'd1` | `NOTE` | Bill Acceptor | Standard paper currency |
+| `3'd2` | `RFID` | Contactless RFID Card | Tap-to-pay |
+| `3'd3` | `CARD` | Credit/Debit Card | Max auth limit: 5000 (amounts > 5000 reject with `ERR_AUTH`) |
+| `3'd4` | `UPI` | Unified Payments Interface | QR / Digital mobile payment |
+| `3'd5` | `WALLET` | Digital Wallet | Pre-loaded stored-value account |
 
 ---
 
-# 6. Internal Transaction Packet
+# 7. Internal Transaction Packet
 
-The Payment Interface converts the request into an internal transaction packet.
+The `payment_interface` converts accepted requests into internal transaction packets with hardware-generated 16-bit monotonic transaction counters and 8-bit CRC protection:
 
 ```systemverilog
 typedef struct packed
 {
-    payment_t payment_type;
-    logic [15:0] amount;
-    logic [4:0] product_id;
-    logic [15:0] transaction_id;
-    logic [7:0] crc;
+    payment_t                     payment_type;
+    logic [BALANCE_WIDTH-1:0]     amount;
+    logic [PRODUCT_ID_WIDTH-1:0]  product_id;
+    logic [TRANSACTION_WIDTH-1:0] transaction_id;
+    logic [7:0]                   crc;
 } transaction_packet_t;
 ```
 
 ---
 
-## Transaction Packet Fields
-
-| Field | Width |
-|--------|------:|
-| Payment Type | 3 |
-| Amount | 16 |
-| Product ID | 5 |
-| Transaction ID | 16 |
-| CRC | 8 |
-
----
-
-# 7. Response Packet
+# 8. Response Packet
 
 ```systemverilog
 typedef struct packed
 {
-    status_t status;
-    error_t error;
-    logic [15:0] refund;
-    logic dispense;
+    status_t                  status;
+    error_t                   error;
+    logic [BALANCE_WIDTH-1:0] refund;
+    logic                     dispense;
 } response_packet_t;
 ```
-
----
 
 ## Response Fields
 
 | Field | Description |
-|--------|-------------|
-| status | Transaction status |
-| error | Error code |
-| refund | Refund amount |
-| dispense | Dispense control |
+|---|---|
+| `status` | Overall transaction outcome (`STATUS_SUCCESS`, `STATUS_FAILED`, `STATUS_TIMEOUT`) |
+| `error` | Diagnostic error code (`ERR_NONE`, `ERR_BALANCE`, `ERR_STOCK`, `ERR_AUTH`, etc.) |
+| `refund` | Refund amount returned to customer |
+| `dispense` | Dispense actuator trigger (`1` = product dispensed, `0` = no dispense) |
 
 ---
 
-# 8. Transaction Status Codes
+# 9. Status and Error Encodings
 
-| Status | Description |
-|---------|-------------|
-| STATUS_IDLE | Controller idle |
-| STATUS_BUSY | Transaction in progress |
-| STATUS_SUCCESS | Transaction completed successfully |
-| STATUS_FAILED | Transaction failed |
-| STATUS_TIMEOUT | Transaction timed out |
-| STATUS_CANCELLED | Transaction cancelled |
+### Status Codes (`status_t`)
+- `STATUS_IDLE` (`4'd0`): Controller is idle.
+- `STATUS_BUSY` (`4'd1`): Transaction in progress.
+- `STATUS_SUCCESS` (`4'd2`): Product dispensed successfully; balance cleared.
+- `STATUS_FAILED` (`4'd3`): Transaction rejected or resource check failed.
+- `STATUS_TIMEOUT` (`4'd4`): Transaction timed out; customer refunded if balance was loaded.
+- `STATUS_CANCELLED` (`4'd5`): Transaction aborted.
 
----
-
-# 9. Error Codes
-
-| Error | Description |
-|--------|-------------|
-| ERR_NONE | No error |
-| ERR_TIMEOUT | Transaction timeout |
-| ERR_INVALID_PRODUCT | Invalid product ID |
-| ERR_CRC | CRC mismatch |
-| ERR_AUTH | Authentication failure |
-| ERR_BALANCE | Insufficient balance |
-| ERR_STOCK | Product unavailable |
-| ERR_DUPLICATE | Duplicate transaction |
+### Error Codes (`error_t`)
+- `ERR_NONE` (`8'd0`): Clean transaction; no error.
+- `ERR_TIMEOUT` (`8'd1`): Transaction timeout timer expired.
+- `ERR_INVALID_PRODUCT` (`8'd2`): Requested `product_id >= PRODUCT_COUNT`.
+- `ERR_CRC` (`8'd3`): CRC checksum failure detected by `security_engine`.
+- `ERR_AUTH` (`8'd4`): Payment authentication failed (e.g. CARD amount > 5000).
+- `ERR_BALANCE` (`8'd5`): Zero payment amount tendered or insufficient balance for product price.
+- `ERR_STOCK` (`8'd6`): Product quantity is zero (out of stock).
+- `ERR_DUPLICATE` (`8'd7`): Duplicate `transaction_id` replayed.
 
 ---
 
-# 10. Transaction Sequence
-
-```mermaid
-sequenceDiagram
-
-participant User
-participant PaymentInterface
-participant SecurityEngine
-participant Controller
-participant Inventory
-participant Response
-
-User->>PaymentInterface: Payment Request
-
-PaymentInterface->>SecurityEngine: Transaction Packet
-
-SecurityEngine->>Controller: Valid Packet
-
-Controller->>Inventory: Check Stock
-
-Inventory-->>Controller: Stock Status
-
-Controller->>Response: Generate Response
-
-Response-->>User: Transaction Complete
-```
-
----
-
-# 11. Controller State Machine
-
-```mermaid
-stateDiagram-v2
-
-[*] --> IDLE
-
-IDLE --> RECEIVE_PAYMENT
-
-RECEIVE_PAYMENT --> AUTHENTICATE
-
-AUTHENTICATE --> CHECK_BALANCE
-
-CHECK_BALANCE --> CHECK_INVENTORY
-
-CHECK_INVENTORY --> DISPENSE
-
-CHECK_INVENTORY --> REFUND
-
-DISPENSE --> COMPLETE
-
-REFUND --> COMPLETE
-
-COMPLETE --> IDLE
-
-AUTHENTICATE --> ERROR_STATE
-
-CHECK_BALANCE --> ERROR_STATE
-
-CHECK_INVENTORY --> ERROR_STATE
-
-ERROR_STATE --> IDLE
-```
-
-
----
-
-# 12. Protocol Rules
-
-## Request Rules
-
-- `request_valid` shall be asserted for one clock cycle.
-- Request fields shall remain stable while `request_valid` is asserted.
-- Only one request shall be active at a time.
-
----
-
-## Response Rules
-
-- `response_valid` is asserted when the transaction completes.
-- Response fields remain valid while `response_valid` is high.
-
----
-
-## Security Rules
-
-Every transaction shall include:
-
-- Transaction ID
-- CRC
-
-The Security Engine verifies:
-
-- CRC correctness
-- Duplicate transaction IDs
-
----
-
-## Inventory Rules
-
-Successful purchase:
-
-- Quantity decreases by one.
-
-Failed purchase:
-
-- Inventory remains unchanged.
-
----
-
-## Balance Rules
-
-Successful purchase:
-
-```
-Balance = Balance − Product Price
-```
-
-Failed purchase:
-
-```
-Refund = Current Balance
-```
-
-Transaction complete:
-
-```
-Balance = 0
-```
-
----
-
-# 13. Timeout Behaviour
-
-If the controller does not complete a transaction within the timeout period:
-
-Status:
-
-```
-STATUS_TIMEOUT
-```
-
-Error:
-
-```
-ERR_TIMEOUT
-```
-
----
-
-# 14. Protocol Compliance
-
-A transaction is considered protocol-compliant if:
-
-- Valid request format
-- Valid CRC
-- Unique transaction ID
-- Valid product ID
-- Sufficient balance
-- Product available
-- Transaction completes before timeout
-
----
-
-# 15. Verification Support
-
-The protocol is verified using:
-
-- Directed Testbench
-- Self-checking Scoreboard
-- Assertions
-- CSV Reports
-- HTML Reports
-- Simulation Logs
-
----
-
-# 16. Summary
-
-| Item | Value |
-|------|-------|
-| Request Interface | payment_request_t |
-| Response Interface | response_packet_t |
-| Payment Methods | 6 |
-| Status Codes | 6 |
-| Error Codes | 8 |
-| Transaction ID | 16 bits |
-| CRC | 8 bits |
-| Verification | Directed Self-Checking |
-| Simulator | Vivado XSIM |
-
----
-
-# Conclusion
-
-This protocol specification defines the communication interface between the host system and the Secure Vending Machine Controller. It standardizes transaction requests, response packets, timing behavior, security checks, and controller operation, providing a consistent interface for design, verification, and future system integration.
+# 10. Protocol Invariants & Rules
+
+1. **Atomicity:** Only one transaction is in-flight at any time across the pipeline.
+2. **Stable Pending State:** Requesters must hold `request_valid` and payload steady while `request_ready == 0`.
+3. **Clean Deassertion:** Requesters must deassert `request_valid` immediately following the accepting clock edge to prevent unintended duplicate transaction initiation.
+4. **Clean Exit:** On every transaction completion (`STATUS_SUCCESS`, `STATUS_FAILED`, or `STATUS_TIMEOUT`), internal balance is cleared to `0`.
+5. **Inventory Decrement:** Inventory quantity is decremented by exactly 1 if and only if `dispense == 1'b1`. In failed transactions, inventory is untouched.

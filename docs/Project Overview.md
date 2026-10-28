@@ -194,11 +194,11 @@ The verification environment automatically generates:
 ```
 reports/
 │
-├── mixed_payment_report.csv
+├── multi_payment_report.csv
 ├── simulation_summary.csv
 ├── payment_statistics.csv
 ├── inventory_report.csv
-├── error_statistics.csv
+├── Transaction_statistics.csv
 ├── verification_report.html
 └── simulation.log
 ```

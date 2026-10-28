@@ -19,6 +19,7 @@ module tb_coin_only;
 
     logic request_valid;
     payment_request_t request;
+    logic request_ready;
 
     response_packet_t response;
     logic response_valid;
@@ -34,11 +35,33 @@ module tb_coin_only;
 
         .request_valid(request_valid),
         .request(request),
+        .request_ready(request_ready),
 
         .response(response),
         .response_valid(response_valid)
     );
     
+
+    //------------------------------------------------------------
+    // v1.0.1 integrity support: error accounting, global watchdog
+    //------------------------------------------------------------
+    integer tb_errors = 0;
+
+    task automatic tb_fail(input string msg);
+    begin
+        tb_errors++;
+        $error("%s", msg);
+    end
+    endtask
+
+    // Global watchdog: a hung wait (e.g. @(posedge ...) that never occurs)
+    // must fail the run instead of hanging the simulator.
+    initial begin
+        #1000000;   // 1 ms of simulated time (timescale 1ns/1ps)
+        $display("SVM_TB_RESULT: FAIL global watchdog expired");
+        $fatal(1, "global watchdog expired");
+    end
+
     //------------------------------------------------------------
     // Assertions
     //------------------------------------------------------------
@@ -47,13 +70,13 @@ module tb_coin_only;
     begin
         if(response_valid)
         begin
-            assert(!$isunknown(resp.status))
+            assert(!$isunknown(response.status))
             else
-                $error("[%0t] ERROR : Unknown Response Status", $time);
+                tb_fail($sformatf("[%0t] ERROR : Unknown Response Status", $time));
     
-            assert(!$isunknown(resp.error))
+            assert(!$isunknown(response.error))
             else
-                $error("[%0t] ERROR : Unknown Error Code", $time);
+                tb_fail($sformatf("[%0t] ERROR : Unknown Error Code", $time));
         end
     end
     
@@ -61,13 +84,13 @@ module tb_coin_only;
     always @(posedge clk)
     begin
         if(response_valid &&
-          (resp.dispense || (resp.refund != 0)))
+          (response.dispense || (response.refund != 0)))
         begin
             #1;
     
             assert(dut.u_balance_manager.current_balance == 0)
             else
-                $error("[%0t] ERROR : Balance Not Cleared!", $time);
+                tb_fail($sformatf("[%0t] ERROR : Balance Not Cleared!", $time));
         end
     end
     
@@ -91,7 +114,7 @@ module tb_coin_only;
                 }
             )
             else
-                $error("[%0t] ERROR : Illegal FSM State!", $time);
+                tb_fail($sformatf("[%0t] ERROR : Illegal FSM State!", $time));
         end
     end
  
@@ -188,33 +211,67 @@ module tb_coin_only;
     //------------------------------------------------------------
     // Send Coin Payment
     //------------------------------------------------------------
-    task send_coin
+        //------------------------------------------------------------
+    // Active transaction tracking (v1.0.1 audit fix)
+    //------------------------------------------------------------
+    typedef struct packed {
+        payment_t                       payment_type;
+        logic [BALANCE_WIDTH-1:0]       amount;
+        logic [PRODUCT_ID_WIDTH-1:0]    product_id;
+        logic [31:0]                    inv_before;
+        logic [BALANCE_WIDTH-1:0]       bal_before;
+    } active_txn_t;
+
+    active_txn_t active_txn;
+    logic active_txn_valid;
+
+task send_coin
     (
         input logic [BALANCE_WIDTH-1:0] amount,
         input logic [PRODUCT_ID_WIDTH-1:0] product
     );
-    
+        integer wait_cycles;
+        bit accepted;
     begin
-    
         cycle_start = cycle_count;
-    
-        inventory_before =
-            dut.u_inventory_manager.qty_mem[product];
-    
+
         @(negedge clk);
-    
         request.payment_type = COIN;
         request.amount       = amount;
         request.product_id   = product;
-    
-        request_valid = 1;
-    
+        request_valid        = 1'b1;
+
+        wait_cycles = 0;
+        accepted    = 1'b0;
+
+        while (!accepted && (wait_cycles < WATCHDOG))
+        begin
+            if (request_ready)
+            begin
+                @(posedge clk);
+                accepted = 1'b1;
+                active_txn.payment_type = COIN;
+                active_txn.amount       = amount;
+                active_txn.product_id   = product;
+                active_txn.inv_before   = dut.u_inventory_manager.qty_mem[product];
+                active_txn.bal_before   = dut.u_balance_manager.current_balance;
+                active_txn_valid        = 1'b1;
+            end
+            else
+            begin
+                @(negedge clk);
+                wait_cycles++;
+            end
+        end
+
         @(negedge clk);
-    
-        request_valid = 0;
-    
+        request_valid = 1'b0;
+
+        if (!accepted)
+        begin
+            tb_fail($sformatf("[%0t] ERROR: Request handshake timeout (request_ready never asserted)!", $time));
+        end
     end
-    
     endtask
     
     //------------------------------------------------------------
@@ -222,66 +279,63 @@ module tb_coin_only;
     //------------------------------------------------------------
     
     task wait_response;
-    
         integer timeout;
-    
     begin
-    
-        // Capture inventory BEFORE transaction completes
-        previous_inventory = dut.u_inventory_manager.qty_mem[request.product_id];
-    
-        timeout = 0;
+        timeout      = 0;
         got_response = 0;
-    
+        resp         = '0;
+
+        while (response_valid) @(posedge clk);
+
         while (timeout < WATCHDOG)
         begin
-    
             @(posedge clk);
-    
             timeout++;
-    
+
             if(response_valid)
             begin
-    
                 got_response = 1;
-    
-                resp = response;
-    
-                cycle_end = cycle_count;
+                resp         = response;
+
+                cycle_end      = cycle_count;
                 latency_cycles = cycle_end - cycle_start;
-    
-                // Capture inventory AFTER transaction
-                inventory_after = dut.u_inventory_manager.qty_mem[request.product_id];
-    
-                // Assertion: Inventory should decrease by one after successful dispense
+
+
+                previous_inventory = active_txn.inv_before;
+                inventory_before   = active_txn.inv_before;
+                inventory_after    = dut.u_inventory_manager.qty_mem[active_txn.product_id];
+
                 if(resp.dispense)
                 begin
                     assert(inventory_after == previous_inventory - 1)
                     else
-                        $error("[%0t] ERROR: Inventory not decremented correctly!", $time);
+                        tb_fail($sformatf("[%0t] ERROR : Inventory not decremented correctly! before=%0d after=%0d",
+                                $time, previous_inventory, inventory_after));
                 end
-    
-                // Assertion: Balance should be cleared after dispense/refund
+                else
+                begin
+                    assert(inventory_after == previous_inventory)
+                    else
+                        tb_fail($sformatf("[%0t] ERROR : Inventory altered on non-dispense! before=%0d after=%0d",
+                                $time, previous_inventory, inventory_after));
+                end
+
                 if(resp.dispense || (resp.refund != 0))
                 begin
                     assert(dut.u_balance_manager.current_balance == 0)
                     else
-                        $error("[%0t] ERROR: Balance not cleared!", $time);
+                        tb_fail($sformatf("[%0t] ERROR : Balance not cleared!", $time));
                 end
-                    
+
                 disable wait_response;
-    
             end
-    
         end
-    
+
         if(!got_response)
         begin
-            $error("[%0t] ERROR: Response Timeout!", $time);
+            tb_fail($sformatf("[%0t] ERROR : Response Timeout!", $time));
         end
-    
     end
-    
     endtask
     
      //------------------------------------------------------------
@@ -359,11 +413,11 @@ module tb_coin_only;
                 latency_cycles,
                 dut.u_payment_interface.packet.transaction_id,
                 dut.u_security_engine.secure_packet.crc,
-                request.payment_type.name(),
-                request.product_id,
+                active_txn.payment_type.name(),
+                active_txn.product_id,
                 inventory_before,
-                dut.u_inventory_manager.price_mem[request.product_id],
-                request.amount,
+                dut.u_inventory_manager.price_mem[active_txn.product_id],
+                active_txn.amount,
                 resp.status.name(),
                 resp.error.name(),
                 resp.dispense,
@@ -743,16 +797,28 @@ module tb_coin_only;
             16'd50
         );
     
+        // Test 12 : Back-to-Back Transactions (Handshake Validated)
         //------------------------------------------------------------
-        // Test 12 : Back-to-Back Coin Insertions
-        //------------------------------------------------------------
     
-        send_coin(16'd10,5'd0);
-    
-        send_coin(16'd20,5'd1);
-    
-        repeat(20)
-            @(posedge clk);
+        send_coin(16'd10, 5'd0);
+        wait_response();
+        check_result(
+            "Back-to-Back Txn 1",
+            STATUS_SUCCESS,
+            ERR_NONE,
+            1'b1,
+            16'd0
+        );
+
+        send_coin(16'd20, 5'd1);
+        wait_response();
+        check_result(
+            "Back-to-Back Txn 2",
+            STATUS_SUCCESS,
+            ERR_NONE,
+            1'b1,
+            16'd0
+        );
     
         check_internal(
             "Controller Returned Idle",
@@ -761,6 +827,7 @@ module tb_coin_only;
         );
     
         //------------------------------------------------------------
+        // //------------------------------------------------------------
         // Test 13 : Timeout Test
         //------------------------------------------------------------
     
@@ -911,7 +978,17 @@ module tb_coin_only;
         $display("===============================================================================================================================================================");
 
     
-        $finish;
+        if (failed_tests != 0 || tb_errors != 0) begin
+            $display("SVM_TB_RESULT: FAIL total=%0d passed=%0d failed=%0d tb_errors=%0d",
+                     total_tests, passed_tests, failed_tests, tb_errors);
+            $fatal(1, "testbench reported failures");
+        end
+        else begin
+            $display("SVM_TB_RESULT: PASS total=%0d passed=%0d failed=%0d tb_errors=%0d",
+                     total_tests, passed_tests, failed_tests, tb_errors);
+            $finish;
+        end
+
     
     end
     
