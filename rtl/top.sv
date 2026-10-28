@@ -8,6 +8,13 @@ module top
     input logic request_valid,
     input transaction_pkg::payment_request_t request,
 
+    // v1.0.1: valid/ready handshake contract (Option A). A request is accepted
+    // on a rising clock edge where (request_valid && request_ready) is true.
+    // The requester must hold request fields stable while request_valid is high
+    // until accepted. Requests presented while request_ready is low are blocked
+    // and must remain stable until accepted.
+    output logic request_ready,
+
     output transaction_pkg::response_packet_t response,
     output logic response_valid,
     
@@ -87,6 +94,20 @@ logic balance_ok;
 logic stock_ok;
 
 //==================================================
+// Single-outstanding-transaction gate (v1.0.1)
+//==================================================
+// The pipeline (interface -> arbiter -> security engine -> controller)
+// has no per-stage back-pressure: security_engine treats packet_valid as
+// a level, not a handshake. To guarantee one transaction in flight, a new
+// request is accepted only when every stage is empty.
+assign request_ready = !rst                 // deasserted during reset
+                     && controller_ready   // FSM in IDLE
+                     && !packet_valid     // nothing leaving payment_interface
+                     && !out_valid        // nothing held in arbiter
+                     && !security_done;   // no security result pending
+
+
+//==================================================
 // Payment Interface
 //==================================================
 
@@ -98,7 +119,7 @@ payment_interface u_payment_interface
     .request(request),
     .request_valid(request_valid),
 
-    .arbiter_ready(arbiter_ready),
+    .arbiter_ready(request_ready),
 
     .packet(packet),
     .packet_valid(packet_valid)
