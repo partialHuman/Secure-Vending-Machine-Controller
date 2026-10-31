@@ -1,336 +1,94 @@
-# Secure Vending Machine Controller Architecture
+# Architecture
 
-## Overview
+Describes the RTL in `rtl/` as of v1.0.2 (identical to v1.0.1). Interface semantics are in `Protocol Specification.md`; limits are in `known-limitations.md`.
 
-The Secure Vending Machine Controller is a modular SystemVerilog design that simulates the operation of a secure automated vending machine supporting multiple payment methods. The controller verifies payment requests, manages customer balance, checks product availability, updates inventory, and generates transaction responses.
-
-The design follows a modular architecture where each functional block performs a dedicated task, making the system scalable, maintainable, and easy to verify.
-
----
-
-# Top-Level Architecture
+## 1. Block diagram
 
 ```mermaid
-flowchart TD
-
-    A[Payment Request]
-
-    B[Payment Interface]
-    C[Payment Arbiter]
-    D[Security Engine]
-
-    E[Balance Manager]
-    F[Timeout Controller]
-
-    G[Transaction Controller]
-
-    H[Inventory Manager]
-    I[Response Generator]
-
-    J[Transaction Response]
-
-    A --> B
-    B --> C
-    C --> D
-
-    D --> E
-    D --> F
-
-    E --> G
-    F --> G
-
-    G --> H
-    G --> I
-
-    I --> J
+flowchart LR
+    REQ[request_valid / request] --> PI[payment_interface<br/>ID + CRC-8]
+    GATE{{request_ready gate<br/>top.sv}} -. admits .-> PI
+    PI --> ARB[payment_arbiter<br/>1-deep register]
+    ARB --> SE[security_engine]
+    SE -->|secure_valid + secure_packet| BM[balance_manager]
+    SE -->|security_done, ok, error| TC[transaction_controller<br/>FSM]
+    SE -->|secure_valid| TO[timeout_controller]
+    INV[inventory_manager] <--> TC
+    BM <--> TC
+    TO --> TC
+    TC --> RG[response_generator]
+    RG --> RSP[response_valid / response]
 ```
 
----
-
-# Design Modules
-
-## 1. Payment Interface
-
-### Purpose
-
-Receives the transaction request from the user and converts it into an internal packet format used by the controller.
-
-### Responsibilities
-
-- Receive payment request
-- Capture transaction ID
-- Capture payment type
-- Capture product ID
-- Capture payment amount
-- Generate packet CRC
-- Assert packet_valid signal
-
----
-
-## 2. Payment Arbiter
-
-### Purpose
-
-Accepts validated packets from the Payment Interface and forwards one transaction for processing.
-
-### Responsibilities
-
-- Accept packet
-- Forward request
-- Prevent multiple simultaneous transactions
-- Generate arbitration grant
-
----
-
-## 3. Security Engine
-
-### Purpose
-
-Performs transaction validation before payment processing.
-
-### Responsibilities
-
-- Verify packet CRC
-- Detect duplicate transaction IDs
-- Generate security status
-- Reject invalid transactions
-
-Possible Errors
-
-- CRC Error
-- Duplicate Transaction
-
----
-
-## 4. Balance Manager
-
-### Purpose
-
-Maintains the customer balance throughout the transaction.
-
-### Responsibilities
-
-- Add deposited amount
-- Deduct product price
-- Handle refunds
-- Clear balance after completion
-
-Operations
-
-```
-Add Balance
-Subtract Price
-Refund Balance
-Clear Balance
-```
-
----
-
-## 5. Inventory Manager
-
-### Purpose
-
-Maintains product quantity and pricing information.
-
-### Responsibilities
-
-- Store product prices
-- Store product quantities
-- Verify stock availability
-- Decrement quantity after successful purchase
-
-Memory
-
-```
-price_mem[]
-qty_mem[]
-```
-
----
-
-## 6. Timeout Controller
-
-### Purpose
-
-Detects incomplete or stalled transactions.
-
-### Responsibilities
-
-- Start timeout timer
-- Detect timeout
-- Generate timeout signal
-- Abort expired transactions
-
----
-
-## 7. Transaction Controller
-
-### Purpose
-
-Acts as the central control unit coordinating the transaction flow.
-
-### Responsibilities
-
-- Receive validated request
-- Check inventory
-- Verify balance
-- Control dispensing
-- Request refund if necessary
-- Signal transaction completion
-
----
-
-## 8. Response Generator
-
-### Purpose
-
-Generates the final transaction response.
-
-### Response Fields
-
-- Transaction Status
-- Error Code
-- Dispense Signal
-- Refund Amount
-
-Possible Status
-
-- STATUS_SUCCESS
-- STATUS_FAILED
-- STATUS_TIMEOUT
-- STATUS_IDLE
-
-Possible Errors
-
-- ERR_NONE
-- ERR_BALANCE
-- ERR_STOCK
-- ERR_DUPLICATE
-- ERR_TIMEOUT
-- ERR_CRC
-
----
-
-# Supported Payment Methods
-
-The controller supports six payment methods.
-
-| Payment Method | Description |
-|---------------|-------------|
-| COIN | Coin-based payment |
-| NOTE | Currency note payment |
-| RFID | RFID card payment |
-| CARD | Debit/Credit card payment |
-| UPI | Unified Payments Interface |
-| WALLET | Digital wallet payment |
-
----
-
-# Transaction Flow
-
+## 2. Modules
+
+| Module | Responsibility | Notes |
+|---|---|---|
+| `transaction_pkg` | Types, widths, constants | `PRODUCT_COUNT = 5`; request 24 bits; response 29 bits |
+| `crc8` | CRC-8, poly 0x07, init 0, MSB-first, no reflection, no final XOR | 40-bit payload `{payment_type, amount, product_id, transaction_id}` |
+| `payment_interface` | Accepts a request when `request_valid && arbiter_ready` (driven by `request_ready` in `top.sv`), assigns a 16-bit transaction ID (starts at 1), registers the packet and a one-clock `packet_valid` | The input is still named `arbiter_ready` for historical reasons |
+| `payment_arbiter` | One-deep packet register | With the gate it never holds a packet while a transaction is in progress |
+| `security_engine` | Registers one verdict per valid packet. Check order: CRC, duplicate ID (same as previous packet), `product_id >= PRODUCT_COUNT`, `amount == 0`, CARD amount > 5000 | Treats `packet_valid` as a level, not a handshake; this is why the top-level gate is required |
+| `balance_manager` | 16-bit balance. Priority: clear, refund, add, subtract | Overflow drops the payment (flag unconnected); unreachable with one outstanding transaction |
+| `inventory_manager` | 32-entry price and quantity tables, reset to price (ID+1)x10, quantity 20 | Only IDs 0-4 are reachable |
+| `timeout_controller` | Starts on `secure_valid`, expires after 20 clocks, level output cleared by `complete` | Not reachable in normal operation |
+| `transaction_controller` | FSM below; drives dispense, refund and complete pulses | `ERROR_STATE` is defined but never entered |
+| `response_generator` | Latches dispense/refund, emits the response at `complete` | Response has no transaction ID |
+| `top` | Integration; `request_ready` gate; debug outputs | See section 4 |
+
+## 3. FSM (`transaction_controller`)
 
 ```mermaid
-flowchart TD
-
-    A[Customer Request]
-
-    B[Payment Interface]
-
-    C[Payment Arbiter]
-
-    D[Security Engine]
-
-    E{CR Valid?}
-
-    F[Reject Transaction]
-
-    G{Duplicate
-     Transaction?}
-
-    H[Balance Manager]
-
-    I{Sufficient
-    Balance?}
-
-    J[Inventory Manager]
-
-    K{Stock Available?}
-
-    L[Dispense Product]
-
-    M[Generate Response]
-
-    N[Transaction Complete]
-
-    A --> B
-    B --> C
-    C --> D
-
-    D --> E
-
-    E -- No --> F
-    E -- Yes --> G
-
-    G -- Yes --> F
-    G -- No --> H
-
-    H --> I
-
-    I -- No --> F
-    I -- Yes --> J
-
-    J --> K
-
-    K -- No --> F
-    K -- Yes --> L
-
-    L --> M
-
-    F --> M
-
-    M --> N
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> RECEIVE_PAYMENT: security_done
+    RECEIVE_PAYMENT --> AUTHENTICATE
+    AUTHENTICATE --> CHECK_BALANCE: security passed
+    AUTHENTICATE --> COMPLETE: security rejected
+    CHECK_BALANCE --> CHECK_INVENTORY: balance >= price
+    CHECK_BALANCE --> REFUND: balance < price
+    CHECK_INVENTORY --> DISPENSE: stock > 0
+    CHECK_INVENTORY --> REFUND: stock == 0
+    DISPENSE --> COMPLETE
+    REFUND --> COMPLETE
+    COMPLETE --> IDLE
+    AUTHENTICATE --> COMPLETE: timeout
+    CHECK_BALANCE --> COMPLETE: timeout
+    CHECK_INVENTORY --> COMPLETE: timeout
 ```
 
----
+A `timeout` also overrides the output logic in any state (it forces status/error to TIMEOUT, clears dispense and refund, and asserts `complete`).
 
-# Internal Memories
+## 4. The request gate (`rtl/top.sv`)
 
-| Memory | Purpose |
-|---------|---------|
-| price_mem[] | Stores product prices |
-| qty_mem[] | Stores available product quantities |
+```
+request_ready = !rst && controller_ready   // FSM in IDLE
+                     && !packet_valid      // nothing leaving payment_interface
+                     && !out_valid         // nothing held in the arbiter
+                     && !security_done;    // no security verdict pending
+```
 
----
+A request is accepted only when the whole pipeline is empty. This is what guarantees one transaction at a time. It replaced v1.0.0, where the interface accepted a request while one was in flight and the level-sensitive security engine then overwrote the in-flight transaction's packet.
 
-# Key Features
+## 5. Request timeline (derived from the RTL source)
 
-- Modular SystemVerilog RTL architecture
-- Secure transaction processing
-- CRC verification
-- Duplicate transaction detection
-- Multi-payment support
-- Automatic inventory management
-- Balance management
-- Timeout detection
-- Automatic refund handling
-- Structured response generation
+Clock 0 is the accepting edge. These figures come from reading the RTL (and a cycle-accurate model checked against the maintainer's v1.0.0 results); the regression is expected to confirm them.
 
----
+| Clock | Success path |
+|---|---|
+| 1 | `packet_valid` |
+| 2 | Packet in arbiter; security engine samples it |
+| 3 | `security_done`; balance loaded; timer starts; FSM sees `done` |
+| 4-8 | RECEIVE_PAYMENT, AUTHENTICATE, CHECK_BALANCE, CHECK_INVENTORY, DISPENSE |
+| 9 | COMPLETE: dispense pulse, price subtracted, quantity decremented |
+| 10 | FSM IDLE, `complete` pulse, balance cleared, **`request_ready` high again** |
+| 11 | `response_valid` |
 
-# Design Characteristics
+`response_valid` appears at clock 8 for a security rejection, 10 for insufficient balance, 11 for success and out-of-stock.
 
-| Parameter | Value |
-|-----------|-------|
-| RTL Language | SystemVerilog |
-| Verification | Directed Self-Checking Testbench |
-| Simulator | Vivado XSIM |
-| Payment Modes | 6 |
-| Inventory Storage | Memory Arrays |
-| Transaction Processing | Sequential |
-| Error Detection | CRC, Duplicate, Timeout, Stock |
+## 6. Behavior that surprises readers
 
----
-
-# Conclusion
-
-The Secure Vending Machine Controller is implemented using a modular architecture that separates payment handling, security verification, balance management, inventory control, timeout monitoring, and response generation into independent RTL modules. This structure improves readability, simplifies verification, and allows future enhancements such as additional payment methods, interfaces, or advanced verification methodologies without significant architectural changes.
+- On success, balance is `amount - price` at clock 10 and then cleared: change is lost (KL-001).
+- A new request can be accepted at clock 10, one clock before the previous response is visible.
+- Reset restores stock and prices (KL-003).
+- `debug_*` outputs and the hierarchical reference in `top.sv` exist for testbenches only; no testbench uses the outputs.

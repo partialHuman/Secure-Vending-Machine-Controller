@@ -1,232 +1,93 @@
 <div align="center">
 
 # Secure Vending Machine Controller
-### SystemVerilog RTL Design and Directed Self-Checking Verification
+### SystemVerilog RTL and directed self-checking verification
 
 ![SystemVerilog](https://img.shields.io/badge/Language-SystemVerilog-blue)
-![Vivado](https://img.shields.io/badge/Simulator-Vivado%20XSIM-orange)
-![Verification](https://img.shields.io/badge/Verification-Directed%20Self--Checking-green)
-![Status](https://img.shields.io/badge/Regression%20checks-327%2F327%20passed-brightgreen)
+![Simulator](https://img.shields.io/badge/Simulator-Vivado%20XSIM%202018.2-orange)
+![Verification](https://img.shields.io/badge/Verification-directed%20simulation-green)
+![Status](https://img.shields.io/badge/Regression%20checks-497%2F497%20passed-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 </div>
 
----
+## Overview
 
-# Overview
+A modular SystemVerilog controller for a vending machine that accepts six payment types (coin, note, RFID, card, UPI, wallet). It validates a payment request, checks an internal CRC-8 and a duplicate-ID rule, tracks a customer balance and product inventory, and returns a response (status, error code, refund, dispense).
 
-The **Secure Vending Machine Controller** is a modular SystemVerilog RTL design that simulates the operation of a secure automated vending machine supporting multiple payment methods.
+**Scope of the claims.** All verification is *directed simulation* in Vivado XSIM. No formal proof, synthesis, timing run or hardware test has been done. The CRC protects an internal register path only; it is an integrity check, not authentication. The CARD "authentication" is a fixed amount limit (5000). See [Known limitations](docs/known-limitations.md) before using this design for anything other than study.
 
-The controller validates payment requests, checks transaction integrity, manages customer balance, updates product inventory, detects transaction errors, and generates appropriate transaction responses.
+## Status of v1.0.2
 
-Following a security audit, the architecture was hardened in `v1.0.1` to implement a robust **Option A Valid/Ready Handshake Protocol** with dedicated back-pressure gating, active transaction tracking scoreboards, and full in-flight contention protection.
+| Item | State |
+|---|---|
+| RTL | **Identical after line-ending normalization to v1.0.1.** No functional behavior change. |
+| Single-outstanding-request gate (`request_ready`) | Introduced in v1.0.1; fixes the concurrent-request corruption found in v1.0.0 |
+| Regression result | **497/497 checks passed** (reproduced across dual independent runs on Vivado 2018.2 XSIM; see [docs/verification.md](docs/verification.md)). |
+| Known defects | Overpayment change is not returned, timeout forfeits the balance, undefined payment types are accepted. Details: [docs/known-limitations.md](docs/known-limitations.md) |
 
----
+## Quick start
 
-# Features
+Requires Vivado/XSIM (developed with 2018.2) on `PATH`. The regression runner is `scripts/run_regression.tcl`.
 
-- Modular RTL Architecture
-- Six Payment Methods (Coin, Note, RFID, Card, UPI, Wallet)
-- Top-Level Valid/Ready Handshake Protocol (Option A)
-- Single-Outstanding-Transaction Pipeline Gate
-- CRC Verification & Duplicate Transaction Detection
-- Automatic Inventory Management
-- Balance Management & Refund Generation
-- Timeout Detection & State Recovery
-- Self-Checking Testbenches with Active Transaction Scoreboards
-- SystemVerilog Assertions
-- Automatic CSV & HTML Report Generation
-- Waveform Documentation
+It compiles the RTL, runs four testbenches, and exits non-zero unless every testbench prints `SVM_TB_RESULT: PASS` with the expected number of checks. Logs, reports, `PROVENANCE.txt` and `regression-summary.txt` go to `build/` (git-ignored).
 
----
+Run the regression with strict manifest checking:
 
-# Supported Payment Methods
-
-| Payment Method | Supported | Specific Rules |
-|---|:---:|---|
-| Coin | ✅ | Physical coin acceptance |
-| Note | ✅ | Paper currency acceptance |
-| RFID | ✅ | Contactless card tap |
-| Card | ✅ | Max auth limit: 5000 (amounts > 5000 rejected with `ERR_AUTH`) |
-| UPI | ✅ | Mobile QR payment |
-| Wallet | ✅ | Stored-value account |
-
----
-
-# Project Architecture
-
-See the detailed architecture document:
-
-```
-docs/Architecture.md
+Linux / macOS (Bash):
+```bash
+SVM_REQUIRE_MANIFEST=1 vivado -mode batch -source scripts/run_regression.tcl
 ```
 
----
+Windows (PowerShell):
+```powershell
+$env:SVM_REQUIRE_MANIFEST="1"; vivado -mode batch -source scripts/run_regression.tcl
+```
 
-# Repository Structure
+Details and options: [scripts/README.md](scripts/README.md).
+
+## Interface in one paragraph
+
+Present `request_valid` with a 24-bit `request` (payment type, amount, product ID). The request is accepted on a clock edge where `request_valid && request_ready`; deassert `request_valid` after that edge. One response (`response_valid` + 29-bit `response`) follows about 8-11 clocks later. Only one transaction is in flight; `request_ready` is low while one is being processed and during reset. Full contract: [docs/Protocol Specification.md](docs/Protocol%20Specification.md).
+
+## Repository layout
 
 ```text
-Secure-Vending-Machine-Controller/
-│
-├── rtl/                        # SystemVerilog RTL modules
-├── tb/                         # Self-checking testbenches
-│   ├── tb_mixed_payment.sv     # Multi-payment & contention suite (69 checks)
-│   ├── tb_coin_only.sv         # Dedicated coin testbench (101 checks)
-│   ├── tb_card_only.sv         # Dedicated card testbench (101 checks)
-│   └── tb_handshake_security.sv# Dedicated security testbench (56 checks)
-├── reports/                    # Reference reports
-├── waveforms/                  # Waveform screenshots and configs
-├── scripts/                    # Regression and compilation scripts
-│   ├── run_regression.tcl      # One-command batch regression
-│   └── compile.tcl             # Compilation script
-├── docs/                       # Technical specifications and audit reports
-├── README.md
-├── LICENSE
-└── .gitignore
+rtl/        SystemVerilog design (11 files, incl. transaction_pkg.sv and crc8.sv)
+tb/         tb_mixed_payment, tb_coin_only, tb_card_only, tb_handshake_security
+scripts/    run_regression.tcl, expected_checks.txt, README.md
+docs/       Architecture, Protocol Specification, verification, known-limitations, roadmap, release-process
+reports/    README.md + v1.0.0_snapshot/ (historical, superseded)
+images/, waveforms/   screenshots from the v1.0.0 run (see README.md in each)
+CHANGELOG.md  CITATION.cff  CONTRIBUTING.md  LICENSE
 ```
 
----
-
-# RTL Modules
+## RTL modules
 
 | Module | Function |
 |---|---|
-| payment_interface | Captures payment request with Option A handshake |
-| payment_arbiter | Arbitrates transactions |
-| security_engine | CRC verification & duplicate transaction detection |
-| balance_manager | Customer balance management & refund calculation |
-| inventory_manager | Product inventory tracking & decrement |
-| timeout_controller | Transaction timeout detection |
-| transaction_controller | Central transaction FSM |
-| response_generator | Transaction response packet generation |
-| top | Top-level integration & single-outstanding transaction gate |
+| `payment_interface` | Accepts a request (when `request_ready`), assigns a transaction ID, appends CRC-8 |
+| `payment_arbiter` | One-deep packet register between interface and security engine |
+| `security_engine` | CRC check, duplicate-ID check, product-ID range, zero amount, CARD amount limit |
+| `balance_manager` | Customer balance: add, subtract, refund, clear |
+| `inventory_manager` | Price and quantity tables, decrement on dispense |
+| `timeout_controller` | 20-clock transaction timer |
+| `transaction_controller` | 8-state transaction FSM |
+| `response_generator` | Builds the response packet |
+| `top` | Integration and the single-outstanding-request gate |
 
----
+## Documentation
 
-# Verification Results (v1.0.1 Regression)
-
-The entire design was verified using the installed **Vivado 2018.2 XSIM** simulator.
-
-```bash
-vivado -mode batch -source scripts/run_regression.tcl
-```
-
-### Regression Summary
-
-```text
-================ REGRESSION SUMMARY ================
-tb_mixed_payment      PASS  SVM_TB_RESULT: PASS total=69 passed=69 failed=0 tb_errors=0
-tb_coin_only          PASS  SVM_TB_RESULT: PASS total=101 passed=101 failed=0 tb_errors=0
-tb_card_only          PASS  SVM_TB_RESULT: PASS total=101 passed=101 failed=0 tb_errors=0
-tb_handshake_security PASS  SVM_TB_RESULT: PASS total=56 passed=56 failed=0 tb_errors=0
-====================================================
-RESULT: PASS
-```
-
-| Testbench | Scope | Total Checks | Passed | Failed | Status |
-|---|---|---:|---:|---:|:---:|
-| `tb_mixed_payment` | All payment modes, contention suite (13A-13E) | 69 | 69 | 0 | **PASS** |
-| `tb_coin_only` | Dedicated coin channel, stress purchases | 101 | 101 | 0 | **PASS** |
-| `tb_card_only` | Dedicated card channel, auth checks | 101 | 101 | 0 | **PASS** |
-| `tb_handshake_security` | Option A contract, contention, security rules | 56 | 56 | 0 | **PASS** |
-| **Total** | **Complete System Regression** | **327** | **327** | **0** | **PASS** |
-
----
-
-# Waveforms
-
-Representative simulation waveforms are available in:
-
-```text
-waveforms/screenshots/
-```
-
-Example screenshots include:
-
-- Reset Operation
-- Coin Transaction
-- RFID Transaction
-- CRC Error Detection
-- Duplicate Transaction
-- Timeout
-- Inventory Update
-- Out-of-Stock Detection
-
----
-
-# Running the Project
-
-Requires Vivado XSIM on `PATH`. Execute the one-command batch regression:
-
-```bash
-vivado -mode batch -source scripts/run_regression.tcl
-```
-
-Outputs go to `build/` (git-ignored). Reference snapshots are preserved in `reports/`.
-
-Or compile individual testbenches:
-
-```bash
-vivado -mode batch -source scripts/compile.tcl
-```
-
----
-
-# Documentation
-
-Detailed documentation is available in the `docs/` directory.
-
-| Document | Description |
+| Document | Authoritative for |
 |---|---|
-| Architecture.md | RTL architecture |
-| Protocol Specification.md | Valid/Ready handshake & protocol specification |
-| Verification_Methodology.md | Verification strategy & active scoreboard design |
-| Test_Cases.md | Directed test cases |
-| Results.md | Verification results & audit findings |
-| Directory_Structure.md | Repository organization |
-| Project Overview.md | High-level system overview |
-| Future_Work.md | Possible extensions |
+| [Protocol Specification](docs/Protocol%20Specification.md) | Ports, handshake, encodings, response semantics |
+| [Architecture](docs/Architecture.md) | Module responsibilities, FSM, request timeline |
+| [Verification](docs/verification.md) | Testbenches, what is and is not checked, how results are produced |
+| [Known limitations](docs/known-limitations.md) | Defects and by-design limits (KL-001...) |
+| [Release process](docs/release-process.md) | Versioning, gates, checklist |
+| [Roadmap](docs/roadmap.md) | Planned work |
+| [CHANGELOG](CHANGELOG.md) | Version history |
 
----
+## License and author
 
-# Development Tools
-
-| Tool | Purpose |
-|---|---|
-| SystemVerilog | RTL Design & Verification |
-| Vivado XSIM | Simulation |
-| Git | Version Control |
-| GitHub | Repository Hosting |
-| Visual Studio Code | Development |
-| Microsoft Excel | CSV Analysis |
-
----
-
-# Key Highlights
-
-- 100% Directed & Contention Test Pass Rate (327/327 checks)
-- Hardened Option A Valid/Ready Request Handshake Protocol
-- Self-Checking Verification Environment with Active Transaction Scoreboards
-- Dedicated Hardware Security Verification Suite (`tb_handshake_security`)
-- Automated Batch Regression Scripts (`scripts/run_regression.tcl`)
-- Multiple Automated Report Formats (CSV, HTML, Simulation Logs)
-- Comprehensive Documentation & Protocol Specifications
-- GitHub-Ready Project Structure
-
----
-
-# License
-
-This project is released under the MIT License.
-
-See the `LICENSE` file for details.
-
----
-
-# Author
-
-**Dhrumil Moga**
-
-M.Tech Student | VLSI Design & Verification
-
----
+MIT License (see `LICENSE`). Author: Dhrumil Moga. To cite, see `CITATION.cff`.
