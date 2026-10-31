@@ -92,6 +92,26 @@ module tb_handshake_security;
     end
 
     //------------------------------------------------------------
+    // Known-limitation observations (documented in docs/known-limitations.md)
+    // These print a marker and never fail the run, unless +STRICT_KL is given.
+    // v1.1.0 is expected to turn STRICT_KL on by default.
+    //------------------------------------------------------------
+    integer kl_hits = 0;
+
+    task automatic kl_note(input string id, input string msg, input bit present);
+    begin
+        if (present) begin
+            kl_hits++;
+            $display("SVM_KNOWN_LIMITATION: %s %s", id, msg);
+            if ($test$plusargs("STRICT_KL")) begin
+                total_tests++; failed_tests++; tb_errors++;
+                $error("STRICT_KL: %s %s", id, msg);
+            end
+        end
+    end
+    endtask
+
+    //------------------------------------------------------------
     // Active transaction tracking
     //------------------------------------------------------------
     typedef struct packed {
@@ -184,6 +204,40 @@ module tb_handshake_security;
     endtask
 
     //------------------------------------------------------------
+    // Helper task: one directed case through the public interface.
+    // check_refund = 0 for policy-dependent refunds (overpayment, KL-001) so
+    // that this suite does not encode a known defect as the expected result.
+    //------------------------------------------------------------
+    task run_case
+    (
+        input string desc,
+        input payment_t payment,
+        input logic [BALANCE_WIDTH-1:0] amount,
+        input logic [PRODUCT_ID_WIDTH-1:0] product,
+        input status_t exp_status,
+        input error_t  exp_error,
+        input bit      exp_dispense,
+        input bit      check_refund,
+        input logic [BALANCE_WIDTH-1:0] exp_refund
+    );
+        response_packet_t rr;
+        bit got;
+        integer q_before;
+    begin
+        q_before = dut.u_inventory_manager.qty_mem[product];
+        send_request(payment, amount, product);
+        wait_response_sec(rr, got);
+        check_condition($sformatf("%s: status", desc),   rr.status   == exp_status);
+        check_condition($sformatf("%s: error", desc),    rr.error    == exp_error);
+        check_condition($sformatf("%s: dispense", desc), rr.dispense == exp_dispense);
+        if (check_refund)
+            check_condition($sformatf("%s: refund", desc), rr.refund == exp_refund);
+        check_condition($sformatf("%s: inventory change", desc),
+            dut.u_inventory_manager.qty_mem[product] == (exp_dispense ? q_before - 1 : q_before));
+    end
+    endtask
+
+    //------------------------------------------------------------
     // Main Test Sequence
     //------------------------------------------------------------
     initial begin
@@ -197,7 +251,7 @@ module tb_handshake_security;
         integer resp_before;
         integer acc_base3;
         integer qty_before;
-        integer ki, k_off;
+        integer ki, k_off, q3, si;
 
         clk           = 0;
         rst           = 1;
@@ -456,6 +510,57 @@ module tb_handshake_security;
             check_condition($sformatf("Test 8[k=%0d]: request_ready is 1 after recovery", k_off),
                             request_ready == 1'b1);
         end
+
+        //--------------------------------------------------------
+        // TEST 9: Boundary values through the public interface
+        // Policy-dependent refunds (overpayment) are intentionally not checked.
+        //--------------------------------------------------------
+        $display("\n--- TEST 9: Boundary values ---");
+        run_case("Test 9: product 4 (highest valid ID), exact payment 50", COIN, 16'd50, 5'd4, STATUS_SUCCESS, ERR_NONE, 1'b1, 1'b1, 16'd0);
+        run_case("Test 9: product 5 (first invalid ID)",                   COIN, 16'd10, 5'd5, STATUS_FAILED, ERR_INVALID_PRODUCT, 1'b0, 1'b0, 16'd0);
+        run_case("Test 9: product 31 (highest encodable ID)",              COIN, 16'd10, 5'd31, STATUS_FAILED, ERR_INVALID_PRODUCT, 1'b0, 1'b0, 16'd0);
+        run_case("Test 9: price-1 (19 for price 20) is refunded",          COIN, 16'd19, 5'd1, STATUS_FAILED, ERR_BALANCE, 1'b0, 1'b1, 16'd19);
+        run_case("Test 9: exact price (20 for price 20)",                  COIN, 16'd20, 5'd1, STATUS_SUCCESS, ERR_NONE, 1'b1, 1'b1, 16'd0);
+        run_case("Test 9: price+1 (21 for price 20)",                      COIN, 16'd21, 5'd1, STATUS_SUCCESS, ERR_NONE, 1'b1, 1'b0, 16'd0);
+        run_case("Test 9: CARD at the 5000 limit",                         CARD, 16'd5000, 5'd0, STATUS_SUCCESS, ERR_NONE, 1'b1, 1'b0, 16'd0);
+        run_case("Test 9: CARD above the 5000 limit (5001)",               CARD, 16'd5001, 5'd0, STATUS_FAILED, ERR_AUTH, 1'b0, 1'b0, 16'd0);
+        run_case("Test 9: maximum amount 65535",                           COIN, 16'd65535, 5'd0, STATUS_SUCCESS, ERR_NONE, 1'b1, 1'b0, 16'd0);
+
+        // Stock boundary: buy product 3 until exactly one unit is left, then buy the last
+        // unit (1 -> 0), then try again (must fail, stock never negative, money returned).
+        q3 = dut.u_inventory_manager.qty_mem[3];
+        for (si = 0; si < q3; si = si + 1)
+        begin
+            send_request(COIN, 16'd40, 5'd3);
+            wait_response_sec(r, got_r);
+            check_condition($sformatf("Test 9: stock purchase %0d of %0d succeeds", si + 1, q3),
+                            r.status == STATUS_SUCCESS && r.dispense == 1'b1);
+        end
+        check_condition("Test 9: stock reached exactly 0", dut.u_inventory_manager.qty_mem[3] == 0);
+        run_case("Test 9: purchase at stock 0", COIN, 16'd40, 5'd3, STATUS_FAILED, ERR_STOCK, 1'b0, 1'b1, 16'd40);
+        check_condition("Test 9: stock still 0 (never negative)", dut.u_inventory_manager.qty_mem[3] == 0);
+
+        //--------------------------------------------------------
+        // TEST 10: Known-limitation observations (do not fail unless +STRICT_KL)
+        //--------------------------------------------------------
+        $display("\n--- TEST 10: Known-limitation observations (see docs/known-limitations.md) ---");
+        send_request(COIN, 16'd50, 5'd2);          // overpay: price 30
+        wait_response_sec(r, got_r);
+        kl_note("KL-001", "overpayment succeeded but refund field is 0 (change not returned)",
+                (r.status == STATUS_SUCCESS && r.refund == 16'd0));
+
+        send_request(payment_t'(3'd6), 16'd10, 5'd0);   // undefined payment_type 6
+        wait_response_sec(r, got_r);
+        kl_note("KL-004", "payment_type 6 (undefined) was accepted and dispensed",
+                (r.status == STATUS_SUCCESS && r.dispense == 1'b1));
+
+        send_request(payment_t'(3'd7), 16'd10, 5'd0);   // undefined payment_type 7
+        wait_response_sec(r, got_r);
+        kl_note("KL-004", "payment_type 7 (undefined) was accepted and dispensed",
+                (r.status == STATUS_SUCCESS && r.dispense == 1'b1));
+        check_condition("Test 10: Controller IDLE after observations",
+                        dut.u_transaction_controller.current_state == IDLE);
+
         //------------------------------------------------------------
         // v1.0.2: request/response conservation (independent monitor)
         // Every accepted request must produce exactly one response unless
