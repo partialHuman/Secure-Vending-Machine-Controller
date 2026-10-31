@@ -63,6 +63,31 @@ module tb_coin_only;
     end
 
     //------------------------------------------------------------
+    // v1.0.2 independent handshake / response monitor
+    // Counts accepted requests (request_valid && request_ready at a clock
+    // edge) and response pulses (rising edges of response_valid)
+    // independently of the test sequence, so lost, duplicated or extra
+    // responses are visible even when a test never looks for them.
+    //------------------------------------------------------------
+    integer mon_accept_total = 0;   // valid && ready handshakes
+    integer mon_resp_total   = 0;   // rising edges of response_valid
+    integer mon_resp_wide    = 0;   // clocks where response_valid stayed high
+    integer mon_aborted      = 0;   // accepted requests deliberately aborted by a test reset
+    integer mon_accept_cycle = 0;   // cycle_count at the most recent acceptance (mixed TB only)
+    logic   mon_resp_prev    = 1'b0;
+
+    always @(posedge clk) begin
+        if (!rst && request_valid && request_ready) begin
+            mon_accept_total <= mon_accept_total + 1;
+        end
+        if (response_valid && !mon_resp_prev)
+            mon_resp_total <= mon_resp_total + 1;
+        if (response_valid && mon_resp_prev)
+            mon_resp_wide  <= mon_resp_wide + 1;
+        mon_resp_prev <= response_valid;
+    end
+
+    //------------------------------------------------------------
     // Assertions
     //------------------------------------------------------------
     // Response assertion
@@ -634,7 +659,7 @@ task send_coin
         wait_response();
     
         check_result(
-            "Over Payment",
+            "Over Payment (KL-001: change not returned)",
             STATUS_SUCCESS,
             ERR_NONE,
             1,
@@ -920,6 +945,30 @@ task send_coin
             IDLE
         );
         
+        //------------------------------------------------------------
+        // v1.0.2: request/response conservation (independent monitor)
+        // Every accepted request must produce exactly one response unless
+        // the test deliberately aborted it with a reset.
+        //------------------------------------------------------------
+        repeat (5) @(posedge clk);
+        total_tests++;
+        if (mon_accept_total == mon_resp_total + mon_aborted)
+            passed_tests++;
+        else begin
+            failed_tests++;
+            tb_fail($sformatf("Monitor: accepted=%0d responses=%0d aborted=%0d violates accepted == responses + aborted",
+                              mon_accept_total, mon_resp_total, mon_aborted));
+        end
+        $display("SVM_MONITOR: accepted=%0d responses=%0d aborted=%0d wide_response_pulses=%0d",
+                 mon_accept_total, mon_resp_total, mon_aborted, mon_resp_wide);
+        if (mon_resp_wide != 0) begin
+            $display("SVM_KNOWN_LIMITATION: KL-002 response_valid stayed high for more than one cycle (%0d extra cycle(s)); see docs/known-limitations.md", mon_resp_wide);
+            if ($test$plusargs("STRICT_KL")) begin
+                total_tests++; failed_tests++;
+                tb_fail("STRICT_KL: response_valid wider than one cycle");
+            end
+        end
+
         // Percentage calculator
         if(total_tests != 0)
             pass_percentage = (passed_tests * 100.0) / total_tests;
