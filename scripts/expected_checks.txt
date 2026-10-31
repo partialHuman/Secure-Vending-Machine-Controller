@@ -1,0 +1,7 @@
+# Expected check counts per testbench (the 'total=' value of SVM_TB_RESULT).
+# Format: <testbench_name> <expected_count>
+# Verified in Vivado 2018.2 XSIM for release v1.0.2.
+tb_card_only 102
+tb_coin_only 102
+tb_handshake_security 220
+tb_mixed_payment 73
