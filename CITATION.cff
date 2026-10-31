@@ -12,9 +12,9 @@ authors:
   - family-names: Moga
     given-names: Dhrumil
 
-version: "1.0.0"
+version: "1.0.2"
 
-date-released: 2026-08-04
+# date-released: YYYY-MM-DD (to be set upon release tagging)
 
 license: MIT
 
@@ -30,8 +30,6 @@ keywords:
   - RTL Design
   - Verification
   - VLSI
-  - ASIC
-  - FPGA
   - Digital Design
   - Vivado
   - XSIM
