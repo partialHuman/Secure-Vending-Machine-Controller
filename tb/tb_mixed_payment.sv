@@ -281,6 +281,32 @@ always #5 clk = ~clk;
     end
 
     //------------------------------------------------------------
+    // v1.0.2 independent handshake / response monitor
+    // Counts accepted requests (request_valid && request_ready at a clock
+    // edge) and response pulses (rising edges of response_valid)
+    // independently of the test sequence, so lost, duplicated or extra
+    // responses are visible even when a test never looks for them.
+    //------------------------------------------------------------
+    integer mon_accept_total = 0;   // valid && ready handshakes
+    integer mon_resp_total   = 0;   // rising edges of response_valid
+    integer mon_resp_wide    = 0;   // clocks where response_valid stayed high
+    integer mon_aborted      = 0;   // accepted requests deliberately aborted by a test reset
+    integer mon_accept_cycle = 0;   // cycle_count at the most recent acceptance (mixed TB only)
+    logic   mon_resp_prev    = 1'b0;
+
+    always @(posedge clk) begin
+        if (!rst && request_valid && request_ready) begin
+            mon_accept_total <= mon_accept_total + 1;
+            mon_accept_cycle <= cycle_count;
+        end
+        if (response_valid && !mon_resp_prev)
+            mon_resp_total <= mon_resp_total + 1;
+        if (response_valid && mon_resp_prev)
+            mon_resp_wide  <= mon_resp_wide + 1;
+        mon_resp_prev <= response_valid;
+    end
+
+    //------------------------------------------------------------
     // Variables
     //------------------------------------------------------------
 
@@ -341,8 +367,6 @@ always #5 clk = ~clk;
         integer wait_cycles;
         bit accepted;
     begin
-        cycle_start = cycle_count;
-
         // Drive stimulus cleanly on negedge clk (half-cycle before posedge)
         @(negedge clk);
         request.payment_type = payment;
@@ -360,6 +384,7 @@ always #5 clk = ~clk;
                 // Handshake condition satisfied: synchronous accepting rising edge of clk
                 @(posedge clk);
                 accepted = 1'b1;
+                cycle_start = cycle_count;   // v1.0.2: latency starts at the accepting edge
 
                 // Latch active transaction on the exact accepting edge
                 active_txn.payment_type = payment;
@@ -1236,6 +1261,7 @@ always #5 clk = ~clk;
         //------------------------------------------------------------
         begin
             integer inv_start_p1, inv_start_p2;
+            integer acc_base_b;
             integer busy_cycles;
             bit second_accepted;
             response_packet_t resp_first;
@@ -1244,6 +1270,7 @@ always #5 clk = ~clk;
 
             inv_start_p1 = dut.u_inventory_manager.qty_mem[1];
             inv_start_p2 = dut.u_inventory_manager.qty_mem[2];
+            acc_base_b   = mon_accept_total;
 
             // 1. Submit first request (CARD, 20, P1) and observe acceptance
             @(negedge clk);
@@ -1300,14 +1327,16 @@ always #5 clk = ~clk;
             // 4. Now Txn 1 finished and controller enters IDLE (request_ready is 1).
             // The very next posedge clk is the synchronous accepting edge for Txn 2.
             @(posedge clk);
-            second_accepted = 1'b1;
+            // v1.0.2: observed, not assumed. The monitor must have counted exactly
+            // two handshakes (Txn 1 and Txn 2) since the start of this subtest.
+            second_accepted = (mon_accept_total == acc_base_b + 2);
             active_txn.payment_type = UPI;
             active_txn.amount       = 16'd30;
             active_txn.product_id   = 5'd2;
             active_txn.inv_before   = inv_start_p2;
             active_txn.bal_before   = dut.u_balance_manager.current_balance;
             active_txn_valid        = 1'b1;
-            cycle_start             = cycle_count;
+            cycle_start             = mon_accept_cycle;   // true acceptance edge of Txn 2
 
             // Deassert request_valid on negedge clk immediately after accepting edge
             @(negedge clk);
@@ -1315,7 +1344,7 @@ always #5 clk = ~clk;
 
             // 5. Verify Txn 1 results
             total_tests++; test_number++;
-            if (got_resp_first && resp_first.status == STATUS_SUCCESS && resp_first.dispense == 1'b1)
+            if (got_resp_first && resp_first.status == STATUS_SUCCESS && resp_first.error == ERR_NONE && resp_first.dispense == 1'b1 && resp_first.refund == 16'd0)
             begin
                 passed_tests++;
                 success_count++;
@@ -1323,8 +1352,16 @@ always #5 clk = ~clk;
                 $display("|%4d |%-43s |%10t|%6d|%5d|%4h|%-7s|%3d|%6d|%5d|%6d|%-22s|%-24s|%4d|%6d|%6d|%-6s|",
                     test_number, "Test B: Txn 1 (Card) Response In-Flight", $time, latency_cycles,
                     dut.u_payment_interface.packet.transaction_id, dut.u_payment_interface.packet.crc,
-                    "CARD", 1, inv_start_p1, 20, 20, "TRANSACTION SUCCESS", "NO ERROR", 1, 0,
-                    dut.u_inventory_manager.qty_mem[1], "PASS");
+                    "CARD", 5'd1, inv_start_p1, dut.u_inventory_manager.price_mem[5'd1], 16'd20,
+                    "TRANSACTION SUCCESS", "NO ERROR", resp_first.dispense, resp_first.refund,
+                    dut.u_inventory_manager.qty_mem[5'd1], "PASS");
+                $fwrite(csv_file,
+                    "%0d,\"%s\",%0t,%0d,%0d,%04h,%s,%0d,%0d,%0d,%0d,\"%s\",\"%s\",%0d,%0d,%0d,%s\n",
+                    test_number, "Test B: Txn 1 (Card) Response In-Flight", $time, latency_cycles,
+                    dut.u_payment_interface.packet.transaction_id, dut.u_payment_interface.packet.crc,
+                    "CARD", 5'd1, inv_start_p1, dut.u_inventory_manager.price_mem[5'd1], 16'd20,
+                    "TRANSACTION SUCCESS", "NO ERROR", resp_first.dispense, resp_first.refund,
+                    dut.u_inventory_manager.qty_mem[5'd1], "PASS");
             end
             else
             begin
@@ -1336,7 +1373,7 @@ always #5 clk = ~clk;
             check_internal("Test B: P1 Inventory Decremented by 1",
                            dut.u_inventory_manager.qty_mem[1], inv_start_p1 - 1);
 
-            check_internal("Test B: Second Request Accepted", second_accepted, 1);
+            check_internal("Test B: Second Request Accepted Exactly Once (monitor)", second_accepted, 1);
 
             // 6. Wait for Txn 2 completion
             wait_response();
@@ -1390,11 +1427,13 @@ always #5 clk = ~clk;
             integer tout;
             bit d_accepted;
             integer inv_start_p0_d, inv_start_p1_d;
+            integer acc_base_d;
             response_packet_t resp_bg;
             bit got_resp_bg;
 
             inv_start_p0_d = dut.u_inventory_manager.qty_mem[0];
             inv_start_p1_d = dut.u_inventory_manager.qty_mem[1];
+            acc_base_d     = mon_accept_total;
 
             // 1. Start background transaction to occupy controller
             @(negedge clk);
@@ -1427,8 +1466,8 @@ always #5 clk = ~clk;
             begin
                 @(posedge clk);
                 tout++;
-                assert(request.payment_type == CARD && request.amount == 16'd20 && request.product_id == 5'd1 && request_valid == 1'b1)
-                else tb_fail("Test D: Request payload not stable while pending!");
+                // (v1.0.2: removed a check that only compared the TB's own driven
+                //  signals with themselves; see the DUT-captured-payload check below)
 
                 if (response_valid && !got_resp_bg)
                 begin
@@ -1444,14 +1483,15 @@ always #5 clk = ~clk;
             // 4. Now background txn finished and controller enters IDLE.
             // The very next posedge clk is the synchronous accepting edge for blocked request D.
             @(posedge clk);
-            d_accepted = 1'b1;
+            // v1.0.2: observed, not assumed (monitor saw exactly two handshakes)
+            d_accepted = (mon_accept_total == acc_base_d + 2);
             active_txn.payment_type = CARD;
             active_txn.amount       = 16'd20;
             active_txn.product_id   = 5'd1;
             active_txn.inv_before   = inv_start_p1_d;
             active_txn.bal_before   = dut.u_balance_manager.current_balance;
             active_txn_valid        = 1'b1;
-            cycle_start             = cycle_count;
+            cycle_start             = mon_accept_cycle;   // true acceptance edge
 
             // Deassert request_valid immediately on negedge clk
             @(negedge clk);
@@ -1459,7 +1499,7 @@ always #5 clk = ~clk;
 
             // 5. Verify background transaction results
             total_tests++; test_number++;
-            if (got_resp_bg && resp_bg.status == STATUS_SUCCESS && resp_bg.dispense == 1'b1)
+            if (got_resp_bg && resp_bg.status == STATUS_SUCCESS && resp_bg.error == ERR_NONE && resp_bg.dispense == 1'b1 && resp_bg.refund == 16'd0)
             begin
                 passed_tests++;
                 success_count++;
@@ -1467,8 +1507,16 @@ always #5 clk = ~clk;
                 $display("|%4d |%-43s |%10t|%6d|%5d|%4h|%-7s|%3d|%6d|%5d|%6d|%-22s|%-24s|%4d|%6d|%6d|%-6s|",
                     test_number, "Test D: Background Txn (Coin P0)", $time, latency_cycles,
                     dut.u_payment_interface.packet.transaction_id, dut.u_payment_interface.packet.crc,
-                    "COIN", 0, inv_start_p0_d, 10, 10, "TRANSACTION SUCCESS", "NO ERROR", 1, 0,
-                    dut.u_inventory_manager.qty_mem[0], "PASS");
+                    "COIN", 5'd0, inv_start_p0_d, dut.u_inventory_manager.price_mem[5'd0], 16'd10,
+                    "TRANSACTION SUCCESS", "NO ERROR", resp_bg.dispense, resp_bg.refund,
+                    dut.u_inventory_manager.qty_mem[5'd0], "PASS");
+                $fwrite(csv_file,
+                    "%0d,\"%s\",%0t,%0d,%0d,%04h,%s,%0d,%0d,%0d,%0d,\"%s\",\"%s\",%0d,%0d,%0d,%s\n",
+                    test_number, "Test D: Background Txn (Coin P0)", $time, latency_cycles,
+                    dut.u_payment_interface.packet.transaction_id, dut.u_payment_interface.packet.crc,
+                    "COIN", 5'd0, inv_start_p0_d, dut.u_inventory_manager.price_mem[5'd0], 16'd10,
+                    "TRANSACTION SUCCESS", "NO ERROR", resp_bg.dispense, resp_bg.refund,
+                    dut.u_inventory_manager.qty_mem[5'd0], "PASS");
             end
             else
             begin
@@ -1477,7 +1525,12 @@ always #5 clk = ~clk;
                 tb_fail("Test D: Background txn response mismatch or timeout");
             end
 
-            check_internal("Test D: Blocked Request Not Lost (Accepted)", d_accepted, 1);
+            check_internal("Test D: Blocked Request Accepted Exactly Once (monitor)", d_accepted, 1);
+            // The DUT must have captured the payload the TB held while it was blocked.
+            check_internal("Test D: DUT Captured Held Request Payload",
+                (dut.u_payment_interface.packet.payment_type == CARD &&
+                 dut.u_payment_interface.packet.amount       == 16'd20 &&
+                 dut.u_payment_interface.packet.product_id   == 5'd1), 1);
 
             // 6. Wait for pending request (CARD P1) to complete
             wait_response();
@@ -1491,6 +1544,7 @@ always #5 clk = ~clk;
         // Subtest 13E: Reset and recovery
         //------------------------------------------------------------
         begin
+            integer resp_before_e;
             // 1. Ready deassertion during reset
             @(negedge clk);
             rst = 1'b1;
@@ -1504,13 +1558,18 @@ always #5 clk = ~clk;
 
             // 2. Submit transaction then assert reset while in flight
             send_payment(COIN, 16'd10, 5'd0);
-            @(negedge clk);
+            repeat (5) @(negedge clk);   // v1.0.2: let the balance load (it is added 3 clocks after acceptance)
+            check_internal("Test E: Balance Loaded Before Mid-Txn Reset (precondition)", dut.u_balance_manager.current_balance, 10);
+            resp_before_e = mon_resp_total;
+            mon_aborted++;               // this accepted request is deliberately aborted by the reset
             rst = 1'b1;
             @(negedge clk);
             check_internal("Test E: Balance Cleared on Mid-Txn Reset", dut.u_balance_manager.current_balance, 0);
             check_internal("Test E: Controller IDLE on Mid-Txn Reset", dut.u_transaction_controller.current_state, IDLE);
             rst = 1'b0;
             repeat(2) @(posedge clk);
+            repeat(25) @(posedge clk);
+            check_internal("Test E: No Response Emitted for Aborted Txn (KL-003)", (mon_resp_total == resp_before_e), 1);
 
             // 3. Post-reset recovery
             send_payment(NOTE, 16'd10, 5'd0);
@@ -1577,6 +1636,30 @@ always #5 clk = ~clk;
         );
 
         cat_begin(0);   // close the last category
+        //------------------------------------------------------------
+        // v1.0.2: request/response conservation (independent monitor)
+        // Every accepted request must produce exactly one response unless
+        // the test deliberately aborted it with a reset.
+        //------------------------------------------------------------
+        repeat (5) @(posedge clk);
+        total_tests++;
+        if (mon_accept_total == mon_resp_total + mon_aborted)
+            passed_tests++;
+        else begin
+            failed_tests++;
+            tb_fail($sformatf("Monitor: accepted=%0d responses=%0d aborted=%0d violates accepted == responses + aborted",
+                              mon_accept_total, mon_resp_total, mon_aborted));
+        end
+        $display("SVM_MONITOR: accepted=%0d responses=%0d aborted=%0d wide_response_pulses=%0d",
+                 mon_accept_total, mon_resp_total, mon_aborted, mon_resp_wide);
+        if (mon_resp_wide != 0) begin
+            $display("SVM_KNOWN_LIMITATION: KL-002 response_valid stayed high for more than one cycle (%0d extra cycle(s)); see docs/known-limitations.md", mon_resp_wide);
+            if ($test$plusargs("STRICT_KL")) begin
+                total_tests++; failed_tests++;
+                tb_fail("STRICT_KL: response_valid wider than one cycle");
+            end
+        end
+
         //------------------------------------------------------------
         // Pass Percentage
         //------------------------------------------------------------
