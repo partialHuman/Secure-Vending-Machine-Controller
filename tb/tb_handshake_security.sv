@@ -67,6 +67,31 @@ module tb_handshake_security;
     end
 
     //------------------------------------------------------------
+    // v1.0.2 independent handshake / response monitor
+    // Counts accepted requests (request_valid && request_ready at a clock
+    // edge) and response pulses (rising edges of response_valid)
+    // independently of the test sequence, so lost, duplicated or extra
+    // responses are visible even when a test never looks for them.
+    //------------------------------------------------------------
+    integer mon_accept_total = 0;   // valid && ready handshakes
+    integer mon_resp_total   = 0;   // rising edges of response_valid
+    integer mon_resp_wide    = 0;   // clocks where response_valid stayed high
+    integer mon_aborted      = 0;   // accepted requests deliberately aborted by a test reset
+    integer mon_accept_cycle = 0;   // cycle_count at the most recent acceptance (mixed TB only)
+    logic   mon_resp_prev    = 1'b0;
+
+    always @(posedge clk) begin
+        if (!rst && request_valid && request_ready) begin
+            mon_accept_total <= mon_accept_total + 1;
+        end
+        if (response_valid && !mon_resp_prev)
+            mon_resp_total <= mon_resp_total + 1;
+        if (response_valid && mon_resp_prev)
+            mon_resp_wide  <= mon_resp_wide + 1;
+        mon_resp_prev <= response_valid;
+    end
+
+    //------------------------------------------------------------
     // Active transaction tracking
     //------------------------------------------------------------
     typedef struct packed {
@@ -169,6 +194,10 @@ module tb_handshake_security;
         response_packet_t r1, r2;
         bit got_r1, r2_accepted;
         integer tout;
+        integer resp_before;
+        integer acc_base3;
+        integer qty_before;
+        integer ki, k_off;
 
         clk           = 0;
         rst           = 1;
@@ -194,7 +223,7 @@ module tb_handshake_security;
         request_valid        = 1'b1;
 
         repeat(3) @(posedge clk);
-        check_condition("Test 1: packet_valid remains 0 while in reset despite request_valid=1",
+        check_condition("Test 1: packet_valid remains 0 while in reset (reset-dominated; the gate check is request_ready==0 above)",
                         dut.u_payment_interface.packet_valid == 1'b0);
 
         @(negedge clk);
@@ -234,6 +263,7 @@ module tb_handshake_security;
         $display("\n--- TEST 3: In-Flight Contention & Level-Sensitive Security Check ---");
         p1_inv_before = dut.u_inventory_manager.qty_mem[1];
         p2_inv_before = dut.u_inventory_manager.qty_mem[2];
+        acc_base3     = mon_accept_total;
 
         // 1. Submit Txn 1 (CARD, 20, P1)
         @(negedge clk);
@@ -280,8 +310,12 @@ module tb_handshake_security;
 
         // 4. Accept Txn 2 on next posedge clk where controller returns to IDLE
         @(posedge clk);
-        r2_accepted = 1'b1;
-        check_condition("Test 3: Txn 2 accepted on posedge entering IDLE", r2_accepted);
+        // v1.0.2: observed, not assumed. The independent monitor must have seen exactly
+        // two handshakes (Txn 1 and Txn 2) since the start of this test. Txn 2 is
+        // accepted in the clock where request_ready returns, which is one clock before
+        // Txn 1's response becomes visible.
+        r2_accepted = (mon_accept_total == acc_base3 + 2);
+        check_condition("Test 3: Txn 2 accepted exactly once after Txn 1 (monitor)", r2_accepted);
 
         // Deassert request_valid on negedge
         @(negedge clk);
@@ -356,7 +390,11 @@ module tb_handshake_security;
         //--------------------------------------------------------
         $display("\n--- TEST 7: Mid-Transaction Reset & Clean Recovery ---");
         send_request(COIN, 16'd10, 5'd0);
-        @(negedge clk);
+        repeat (5) @(negedge clk);   // v1.0.2: the balance is added 3 clocks after acceptance
+        check_condition("Test 7: Balance loaded before reset (precondition, non-vacuous)",
+                        dut.u_balance_manager.current_balance == 16'd10);
+        resp_before = mon_resp_total;
+        mon_aborted++;               // this accepted request is deliberately aborted
         rst = 1'b1;
         @(negedge clk);
         check_condition("Test 7: Balance cleared on mid-transaction reset",
@@ -368,6 +406,9 @@ module tb_handshake_security;
         rst = 1'b0;
         repeat(2) @(posedge clk);
         check_condition("Test 7: request_ready is 1 after reset release", request_ready == 1'b1);
+        repeat (25) @(posedge clk);
+        check_condition("Test 7: No response emitted for the aborted transaction (KL-003)",
+                        mon_resp_total == resp_before);
 
         // Submit recovery transaction
         send_request(NOTE, 16'd10, 5'd0);
@@ -378,6 +419,66 @@ module tb_handshake_security;
                         r.dispense == 1'b1);
         check_condition("Test 7: Final Controller state is IDLE",
                         dut.u_transaction_controller.current_state == IDLE);
+
+        //--------------------------------------------------------
+        // TEST 8: Reset at several points of an in-flight transaction (KL-003)
+        // COIN 50 for product 2 (price 30). k_off = clock edges after acceptance.
+        // Documented behavior: reset discards the balance, emits no response and
+        // restores the stock counters to their initial value.
+        //--------------------------------------------------------
+        $display("\n--- TEST 8: Reset at several points of an in-flight transaction ---");
+        for (ki = 0; ki < 4; ki = ki + 1)
+        begin
+            k_off = (ki == 0) ? 3 : (ki == 1) ? 5 : (ki == 2) ? 8 : 9;
+            qty_before = dut.u_inventory_manager.qty_mem[2];
+            send_request(COIN, 16'd50, 5'd2);
+            repeat (k_off) @(negedge clk);
+            if (k_off < 9)
+                check_condition($sformatf("Test 8[k=%0d]: balance loaded before reset (precondition)", k_off),
+                                dut.u_balance_manager.current_balance == 16'd50);
+            else
+                check_condition($sformatf("Test 8[k=%0d]: purchase already completed before reset (precondition)", k_off),
+                                dut.u_inventory_manager.qty_mem[2] == qty_before - 1);
+            resp_before = mon_resp_total;
+            mon_aborted++;
+            rst = 1'b1;
+            @(negedge clk);
+            rst = 1'b0;
+            check_condition($sformatf("Test 8[k=%0d]: balance cleared by reset", k_off),
+                            dut.u_balance_manager.current_balance == 0);
+            check_condition($sformatf("Test 8[k=%0d]: controller IDLE after reset", k_off),
+                            dut.u_transaction_controller.current_state == IDLE);
+            check_condition($sformatf("Test 8[k=%0d]: stock restored to initial value by reset (KL-003)", k_off),
+                            dut.u_inventory_manager.qty_mem[2] == 20);
+            repeat (25) @(posedge clk);
+            check_condition($sformatf("Test 8[k=%0d]: no response emitted for aborted transaction", k_off),
+                            mon_resp_total == resp_before);
+            check_condition($sformatf("Test 8[k=%0d]: request_ready is 1 after recovery", k_off),
+                            request_ready == 1'b1);
+        end
+        //------------------------------------------------------------
+        // v1.0.2: request/response conservation (independent monitor)
+        // Every accepted request must produce exactly one response unless
+        // the test deliberately aborted it with a reset.
+        //------------------------------------------------------------
+        repeat (5) @(posedge clk);
+        total_tests++;
+        if (mon_accept_total == mon_resp_total + mon_aborted)
+            passed_tests++;
+        else begin
+            failed_tests++;
+            tb_fail($sformatf("Monitor: accepted=%0d responses=%0d aborted=%0d violates accepted == responses + aborted",
+                              mon_accept_total, mon_resp_total, mon_aborted));
+        end
+        $display("SVM_MONITOR: accepted=%0d responses=%0d aborted=%0d wide_response_pulses=%0d",
+                 mon_accept_total, mon_resp_total, mon_aborted, mon_resp_wide);
+        if (mon_resp_wide != 0) begin
+            $display("SVM_KNOWN_LIMITATION: KL-002 response_valid stayed high for more than one cycle (%0d extra cycle(s)); see docs/known-limitations.md", mon_resp_wide);
+            if ($test$plusargs("STRICT_KL")) begin
+                total_tests++; failed_tests++;
+                tb_fail("STRICT_KL: response_valid wider than one cycle");
+            end
+        end
 
         //--------------------------------------------------------
         // Final Summary
