@@ -2,7 +2,7 @@
 
 ## Secure Vending Machine Controller
 
-Version: 1.0.1 (Post-Audit Hardened)
+Version: 1.0.2 (documentation corrected against the RTL; RTL identical to v1.0.1)
 
 ---
 
@@ -38,8 +38,8 @@ flowchart LR
 | `request_valid` | 1 | Input | Indicates a valid payment request is presented |
 | `request` | 24 | Input | Structured payment request payload |
 | `request_ready` | 1 | Output | Indicates controller is ready to accept a new request |
-| `response` | 32 | Output | Structured transaction response packet |
-| `response_valid` | 1 | Output | Single-cycle pulse indicating response availability |
+| `response` | 29 | Output | Structured transaction response packet (`status` 4 + `error` 8 + `refund` 16 + `dispense` 1) |
+| `response_valid` | 1 | Output | Pulse indicating response availability; one clock wide on all paths reachable through the ports (the forced-timeout path can be wider, see KL-002) |
 
 ---
 
@@ -136,7 +136,7 @@ typedef struct packed
 |---|---|
 | `status` | Overall transaction outcome (`STATUS_SUCCESS`, `STATUS_FAILED`, `STATUS_TIMEOUT`) |
 | `error` | Diagnostic error code (`ERR_NONE`, `ERR_BALANCE`, `ERR_STOCK`, `ERR_AUTH`, etc.) |
-| `refund` | Refund amount returned to customer |
+| `refund` | Amount returned to the customer. In v1.0.x it is non-zero only when a purchase is refused **after** the balance was loaded (`ERR_BALANCE` insufficient balance, `ERR_STOCK`); it is `0` on a successful purchase **even if the customer overpaid** (KL-001), on a timeout (KL-002) and when the request was rejected by the security engine. |
 | `dispense` | Dispense actuator trigger (`1` = product dispensed, `0` = no dispense) |
 
 ---
@@ -146,27 +146,30 @@ typedef struct packed
 ### Status Codes (`status_t`)
 - `STATUS_IDLE` (`4'd0`): Controller is idle.
 - `STATUS_BUSY` (`4'd1`): Transaction in progress.
-- `STATUS_SUCCESS` (`4'd2`): Product dispensed successfully; balance cleared.
+- `STATUS_SUCCESS` (`4'd2`): Product dispensed successfully; the balance is cleared, so any amount above the price is **not** returned (KL-001).
 - `STATUS_FAILED` (`4'd3`): Transaction rejected or resource check failed.
-- `STATUS_TIMEOUT` (`4'd4`): Transaction timed out; customer refunded if balance was loaded.
+- `STATUS_TIMEOUT` (`4'd4`): Transaction timed out. The balance is cleared and **no refund is generated** (KL-002). The timer cannot expire through the public interface in v1.0.x because the FSM always advances (the timer starts when the security engine accepts the payment and the FSM completes about 7 clocks later, against a 20-clock timer); tests reach this state only by forcing the FSM.
 - `STATUS_CANCELLED` (`4'd5`): Transaction aborted.
 
 ### Error Codes (`error_t`)
 - `ERR_NONE` (`8'd0`): Clean transaction; no error.
 - `ERR_TIMEOUT` (`8'd1`): Transaction timeout timer expired.
 - `ERR_INVALID_PRODUCT` (`8'd2`): Requested `product_id >= PRODUCT_COUNT`.
-- `ERR_CRC` (`8'd3`): CRC checksum failure detected by `security_engine`.
-- `ERR_AUTH` (`8'd4`): Payment authentication failed (e.g. CARD amount > 5000).
-- `ERR_BALANCE` (`8'd5`): Zero payment amount tendered or insufficient balance for product price.
+- `ERR_CRC` (`8'd3`): CRC checksum failure detected by `security_engine`. The CRC is generated inside the design, so this cannot be produced through the request port (KL-006).
+- `ERR_AUTH` (`8'd4`): CARD amount greater than 5000. This is a fixed amount limit, **not** card authentication; no PIN, CVV, expiry or bank check exists.
+- `ERR_BALANCE` (`8'd5`): Zero payment amount tendered (rejected by the security engine, refund 0) or insufficient balance for the product price (refund = amount tendered).
 - `ERR_STOCK` (`8'd6`): Product quantity is zero (out of stock).
-- `ERR_DUPLICATE` (`8'd7`): Duplicate `transaction_id` replayed.
+- `ERR_DUPLICATE` (`8'd7`): Same `transaction_id` as the immediately preceding packet. IDs are assigned inside the design, so this cannot be produced through the request port (KL-007).
 
 ---
 
 # 10. Protocol Invariants & Rules
 
-1. **Atomicity:** Only one transaction is in-flight at any time across the pipeline.
+1. **Atomicity:** Only one transaction is in flight at any time across the pipeline. This is enforced by the `request_ready` gate in `rtl/top.sv` and is supported by directed simulation and a model-based random check; it is **not** backed by an assertion or formal proof. `request_ready` returns high in the clock in which the finished transaction's `complete` pulse is asserted, i.e. one clock before that transaction's `response_valid` is visible; responses stay in order.
 2. **Stable Pending State:** Requesters must hold `request_valid` and payload steady while `request_ready == 0`.
-3. **Clean Deassertion:** Requesters must deassert `request_valid` immediately following the accepting clock edge to prevent unintended duplicate transaction initiation.
-4. **Clean Exit:** On every transaction completion (`STATUS_SUCCESS`, `STATUS_FAILED`, or `STATUS_TIMEOUT`), internal balance is cleared to `0`.
+3. **Clean Deassertion:** Requesters must deassert `request_valid` immediately following the accepting clock edge. The request carries no ID, so a requester that keeps `request_valid` high starts another, identical purchase when `request_ready` returns (KL-008).
+4. **Clean Exit:** On every transaction completion (`STATUS_SUCCESS`, `STATUS_FAILED`, or `STATUS_TIMEOUT`), internal balance is cleared to `0`. On a successful purchase this discards any overpayment (KL-001); this is a known defect, not an intended policy.
 5. **Inventory Decrement:** Inventory quantity is decremented by exactly 1 if and only if `dispense == 1'b1`. In failed transactions, inventory is untouched.
+6. **Reset:** Reset discards any balance and any in-flight transaction **without emitting a response or a refund**, and restores every inventory quantity (20) and price to its initial value (KL-003). `request_ready` is low while `rst` is high.
+7. **Payment type:** `payment_type` encodings 6 and 7 are undefined but are not rejected; they are processed like any other type (KL-004).
+8. **Documented limitations:** see `docs/known-limitations.md`; each KL-xxx identifier above is defined there.
