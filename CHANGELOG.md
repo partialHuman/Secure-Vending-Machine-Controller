@@ -10,7 +10,7 @@ Nothing yet.
 
 ---
 
-# [1.0.2] - unreleased candidate (release date to be set when tagging)
+# [1.0.2] - 2026-10-31
 
 Evidence, documentation and test-hygiene release. **RTL is identical after line-ending normalization to v1.0.1; there is no behavior change.**
 
