@@ -1,0 +1,156 @@
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_coin_only_snap/xsim_script.tcl
+# xsim {tb_coin_only_snap} -testplusarg REPORT_DIR=C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/build/reports/tb_coin_only -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+
+======================================================================================================================================================================================================================
+TRANSACTION VERIFICATION REPORT
+======================================================================================================================================================================================================================
+|Test |                Scenario                  |           Time(ns) |Lat(C)|TxnID|CRC |Payment|PID|Qty(B)|Price|Coin|    Status     |     Error     |Disp|Refund|Qty(A)|Result|
+======================================================================================================================================================================================================================
+|   1 |           Controller in IDLE after Reset |               85000|     0|    0|0000|       |  0|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+|   2 |                  Balance = 0 after Reset |               85000|     0|    0|0000|       |  0|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+|   3 |             Response Invalid after Reset |               85000|     0|    0|0000|       |  0|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+|   4 |                       Exact Coin Payment |              205000|    12|    1|0097|   COIN|  0|    20|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    19|  PASS|
+|   5 |                  Inventory Product0 = 19 |              205000|     0|    0|0000|       |  0|    19|    0|   0|               |               |   0|     0|    19|  PASS|
+|   6 |                          Balance Cleared |              205000|     0|    0|0000|       |  0|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+|   7 |                        Insufficient Coin |              315000|    11|    2|002d|   COIN|  1|    20|   20|   5|  STATUS_FAILED|    ERR_BALANCE|   0|     5|    20|  PASS|
+|   8 |             Balance Cleared After Refund |              315000|     0|    0|0000|       |  1|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+|   9 |                      Inventory Unchanged |              315000|     0|    0|0000|       |  1|    20|    0|   0|               |               |   0|     0|    20|  PASS|
+|  10 |                      Exact Coin Product1 |              435000|    12|    3|0045|   COIN|  1|    20|   20|  20| STATUS_SUCCESS|       ERR_NONE|   1|     0|    19|  PASS|
+|  11 |                  Inventory Product1 = 19 |              435000|     0|    0|0000|       |  1|    19|    0|   0|               |               |   0|     0|    19|  PASS|
+|  12 | Over Payment (KL-001: change not returned) |              555000|    12|    4|0038|   COIN|  2|    20|   30|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    19|  PASS|
+|  13 |                                Zero Coin |              645000|     9|    5|0038|   COIN|  2|    19|   30|   0|  STATUS_FAILED|    ERR_BALANCE|   0|     0|    19|  PASS|
+|  14 |                      Repeated Purchase 1 |              765000|    12|    6|0082|   COIN|  0|    19|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    18|  PASS|
+|  15 |                      Repeated Purchase 2 |              885000|    12|    7|0085|   COIN|  0|    18|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    17|  PASS|
+|  16 |                      Repeated Purchase 3 |             1005000|    12|    8|00a8|   COIN|  0|    17|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    16|  PASS|
+|  17 |                      Repeated Purchase 4 |             1125000|    12|    9|00af|   COIN|  0|    16|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    15|  PASS|
+|  18 |                      Repeated Purchase 5 |             1245000|    12|   10|00a6|   COIN|  0|    15|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    14|  PASS|
+|  19 |                  Inventory Product0 = 14 |             1245000|     0|    0|0000|       |  0|    14|    0|   0|               |               |   0|     0|    14|  PASS|
+|  20 |               Duplicate Txn First Packet |             1365000|    12|  100|00ab|   COIN|  0|    14|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    13|  PASS|
+|  21 |                    Duplicate Transaction |             1455000|     9|  100|00ab|   COIN|  0|    13|   10|  10|  STATUS_FAILED|  ERR_DUPLICATE|   0|     0|    13|  PASS|
+|  22 |                           CRC Corruption |             1545000|     9|  100|00ab|   COIN|  0|    13|   10|  10|  STATUS_FAILED|        ERR_CRC|   0|     0|    13|  PASS|
+|  23 |               Stock Depletion Purchase 1 |             1665000|    12|  101|0065|   COIN|  4|    20|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    19|  PASS|
+|  24 |               Stock Depletion Purchase 2 |             1785000|    12|  102|006c|   COIN|  4|    19|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    18|  PASS|
+|  25 |               Stock Depletion Purchase 3 |             1905000|    12|  103|006b|   COIN|  4|    18|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    17|  PASS|
+|  26 |               Stock Depletion Purchase 4 |             2025000|    12|  104|0046|   COIN|  4|    17|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    16|  PASS|
+|  27 |               Stock Depletion Purchase 5 |             2145000|    12|  105|0041|   COIN|  4|    16|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    15|  PASS|
+|  28 |               Stock Depletion Purchase 6 |             2265000|    12|  106|0048|   COIN|  4|    15|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    14|  PASS|
+|  29 |               Stock Depletion Purchase 7 |             2385000|    12|  107|004f|   COIN|  4|    14|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    13|  PASS|
+|  30 |               Stock Depletion Purchase 8 |             2505000|    12|  108|005a|   COIN|  4|    13|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    12|  PASS|
+|  31 |               Stock Depletion Purchase 9 |             2625000|    12|  109|005d|   COIN|  4|    12|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    11|  PASS|
+|  32 |              Stock Depletion Purchase 10 |             2745000|    12|  110|0054|   COIN|  4|    11|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|    10|  PASS|
+|  33 |              Stock Depletion Purchase 11 |             2865000|    12|  111|0053|   COIN|  4|    10|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     9|  PASS|
+|  34 |              Stock Depletion Purchase 12 |             2985000|    12|  112|000e|   COIN|  4|     9|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     8|  PASS|
+|  35 |              Stock Depletion Purchase 13 |             3105000|    12|  113|0009|   COIN|  4|     8|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     7|  PASS|
+|  36 |              Stock Depletion Purchase 14 |             3225000|    12|  114|0000|   COIN|  4|     7|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     6|  PASS|
+|  37 |              Stock Depletion Purchase 15 |             3345000|    12|  115|0007|   COIN|  4|     6|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     5|  PASS|
+|  38 |              Stock Depletion Purchase 16 |             3465000|    12|  116|0012|   COIN|  4|     5|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     4|  PASS|
+|  39 |              Stock Depletion Purchase 17 |             3585000|    12|  117|0015|   COIN|  4|     4|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     3|  PASS|
+|  40 |              Stock Depletion Purchase 18 |             3705000|    12|  118|001c|   COIN|  4|     3|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     2|  PASS|
+|  41 |              Stock Depletion Purchase 19 |             3825000|    12|  119|001b|   COIN|  4|     2|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     1|  PASS|
+|  42 |              Stock Depletion Purchase 20 |             3945000|    12|  120|0036|   COIN|  4|     1|   50|  50| STATUS_SUCCESS|       ERR_NONE|   1|     0|     0|  PASS|
+|  43 |                   Inventory Product4 = 0 |             3945000|     0|    0|0000|       |  4|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+|  44 |                              Stock Empty |             4065000|    12|  121|0031|   COIN|  4|     0|   50|  50|  STATUS_FAILED|      ERR_STOCK|   0|    50|     0|  PASS|
+|  45 |                       Back-to-Back Txn 1 |             4185000|    12|  122|00f1|   COIN|  0|    13|   10|  10| STATUS_SUCCESS|       ERR_NONE|   1|     0|    12|  PASS|
+|  46 |                       Back-to-Back Txn 2 |             4305000|    12|  123|002a|   COIN|  1|    19|   20|  20| STATUS_SUCCESS|       ERR_NONE|   1|     0|    18|  PASS|
+|  47 |                 Controller Returned Idle |             4305000|     0|    0|0000|       |  1|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+|  48 |                      Timeout Transaction |             4575000|    27|  124|00e3|   COIN|  0|    12|   10|  10| STATUS_TIMEOUT|    ERR_TIMEOUT|   0|     0|    12|  PASS|
+|  49 |                   Stress Test Purchase 1 |             4695000|    12|  125|0015|   COIN|  2|    19|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    18|  PASS|
+|  50 |                   Stress Test Purchase 2 |             4815000|    12|  126|001c|   COIN|  2|    18|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    17|  PASS|
+|  51 |                   Stress Test Purchase 3 |             4935000|    12|  127|001b|   COIN|  2|    17|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    16|  PASS|
+|  52 |                   Stress Test Purchase 4 |             5055000|    12|  128|00e8|   COIN|  2|    16|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    15|  PASS|
+|  53 |                   Stress Test Purchase 5 |             5175000|    12|  129|00ef|   COIN|  2|    15|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    14|  PASS|
+|  54 |                   Stress Test Purchase 6 |             5295000|    12|  130|00e6|   COIN|  2|    14|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    13|  PASS|
+|  55 |                   Stress Test Purchase 7 |             5415000|    12|  131|00e1|   COIN|  2|    13|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    12|  PASS|
+|  56 |                   Stress Test Purchase 8 |             5535000|    12|  132|00f4|   COIN|  2|    12|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    11|  PASS|
+|  57 |                   Stress Test Purchase 9 |             5655000|    12|  133|00f3|   COIN|  2|    11|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|    10|  PASS|
+|  58 |                  Stress Test Purchase 10 |             5775000|    12|  134|00fa|   COIN|  2|    10|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     9|  PASS|
+|  59 |                  Stress Test Purchase 11 |             5895000|    12|  135|00fd|   COIN|  2|     9|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     8|  PASS|
+|  60 |                  Stress Test Purchase 12 |             6015000|    12|  136|00d0|   COIN|  2|     8|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     7|  PASS|
+|  61 |                  Stress Test Purchase 13 |             6135000|    12|  137|00d7|   COIN|  2|     7|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     6|  PASS|
+|  62 |                  Stress Test Purchase 14 |             6255000|    12|  138|00de|   COIN|  2|     6|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     5|  PASS|
+|  63 |                  Stress Test Purchase 15 |             6375000|    12|  139|00d9|   COIN|  2|     5|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     4|  PASS|
+|  64 |                  Stress Test Purchase 16 |             6495000|    12|  140|00cc|   COIN|  2|     4|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     3|  PASS|
+|  65 |                  Stress Test Purchase 17 |             6615000|    12|  141|00cb|   COIN|  2|     3|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     2|  PASS|
+|  66 |                  Stress Test Purchase 18 |             6735000|    12|  142|00c2|   COIN|  2|     2|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     1|  PASS|
+|  67 |                  Stress Test Purchase 19 |             6855000|    12|  143|00c5|   COIN|  2|     1|   30|  30| STATUS_SUCCESS|       ERR_NONE|   1|     0|     0|  PASS|
+|  68 |    Stress Test Purchase 20 (Stock Empty) |             6975000|    12|  144|0098|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  69 |    Stress Test Purchase 21 (Stock Empty) |             7095000|    12|  145|009f|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  70 |    Stress Test Purchase 22 (Stock Empty) |             7215000|    12|  146|0096|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  71 |    Stress Test Purchase 23 (Stock Empty) |             7335000|    12|  147|0091|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  72 |    Stress Test Purchase 24 (Stock Empty) |             7455000|    12|  148|0084|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  73 |    Stress Test Purchase 25 (Stock Empty) |             7575000|    12|  149|0083|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  74 |    Stress Test Purchase 26 (Stock Empty) |             7695000|    12|  150|008a|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  75 |    Stress Test Purchase 27 (Stock Empty) |             7815000|    12|  151|008d|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  76 |    Stress Test Purchase 28 (Stock Empty) |             7935000|    12|  152|00a0|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  77 |    Stress Test Purchase 29 (Stock Empty) |             8055000|    12|  153|00a7|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  78 |    Stress Test Purchase 30 (Stock Empty) |             8175000|    12|  154|00ae|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  79 |    Stress Test Purchase 31 (Stock Empty) |             8295000|    12|  155|00a9|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  80 |    Stress Test Purchase 32 (Stock Empty) |             8415000|    12|  156|00bc|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  81 |    Stress Test Purchase 33 (Stock Empty) |             8535000|    12|  157|00bb|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  82 |    Stress Test Purchase 34 (Stock Empty) |             8655000|    12|  158|00b2|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  83 |    Stress Test Purchase 35 (Stock Empty) |             8775000|    12|  159|00b5|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  84 |    Stress Test Purchase 36 (Stock Empty) |             8895000|    12|  160|0008|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  85 |    Stress Test Purchase 37 (Stock Empty) |             9015000|    12|  161|000f|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  86 |    Stress Test Purchase 38 (Stock Empty) |             9135000|    12|  162|0006|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  87 |    Stress Test Purchase 39 (Stock Empty) |             9255000|    12|  163|0001|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  88 |    Stress Test Purchase 40 (Stock Empty) |             9375000|    12|  164|0014|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  89 |    Stress Test Purchase 41 (Stock Empty) |             9495000|    12|  165|0013|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  90 |    Stress Test Purchase 42 (Stock Empty) |             9615000|    12|  166|001a|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  91 |    Stress Test Purchase 43 (Stock Empty) |             9735000|    12|  167|001d|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  92 |    Stress Test Purchase 44 (Stock Empty) |             9855000|    12|  168|0030|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  93 |    Stress Test Purchase 45 (Stock Empty) |             9975000|    12|  169|0037|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  94 |    Stress Test Purchase 46 (Stock Empty) |            10095000|    12|  170|003e|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  95 |    Stress Test Purchase 47 (Stock Empty) |            10215000|    12|  171|0039|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  96 |    Stress Test Purchase 48 (Stock Empty) |            10335000|    12|  172|002c|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  97 |    Stress Test Purchase 49 (Stock Empty) |            10455000|    12|  173|002b|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  98 |    Stress Test Purchase 50 (Stock Empty) |            10575000|    12|  174|0022|   COIN|  2|     0|   30|  30|  STATUS_FAILED|      ERR_STOCK|   0|    30|     0|  PASS|
+|  99 |                   Inventory Product2 = 0 |            10575000|     0|    0|0000|       |  2|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+| 100 |                        Final Balance = 0 |            10575000|     0|    0|0000|       |  2|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+| 101 |  Transaction Controller Returned to IDLE |            10575000|     0|    0|0000|       |  2|     0|    0|   0|               |               |   0|     0|     0|  PASS|
+SVM_MONITOR: accepted=87 responses=87 aborted=0 wide_response_pulses=1
+SVM_KNOWN_LIMITATION: KL-002 response_valid stayed high for more than one cycle (1 extra cycle(s)); see docs/known-limitations.md
+===============================================================================================================================================================
+
+Total Tests  : 102
+Passed Tests : 102
+Failed Tests : 0
+Pass Percentage  : 100.00 %
+Simulation Time  : 10625000 ns
+
+TRANSACTION STATISTICS
+----------------------------------------------------
+Successful Transactions : 50
+Balance Errors          : 2
+CRC Errors              : 1
+Duplicate Transactions  : 1
+Timeout Transactions    : 1
+Stock Errors            : 32
+----------------------------------------------------
+
+
+============================================================
+                 FINAL INVENTORY REPORT
+============================================================
+| Product | Price | Quantity |
+------------------------------------------------------------
+|   0     |    10 |       12 |
+|   1     |    20 |       18 |
+|   2     |    30 |        0 |
+|   3     |    40 |       20 |
+|   4     |    50 |        0 |
+============================================================
+
+===============================================================================================================================================================
+SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0
+$finish called at time : 10625 ns : File "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/tb/tb_coin_only.sv" Line 1038
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 19 00:23:06 2026...

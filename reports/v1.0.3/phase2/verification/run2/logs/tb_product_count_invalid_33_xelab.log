@@ -1,0 +1,10 @@
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:\Xilinx\Vivado\2018.2\bin\unwrapped\win64.o\xelab.exe tb_product_count_invalid_33 -debug typical -s tb_product_count_invalid_33_snap 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+ERROR: [VRFC 10-2063] Module <PRODUCT_COUNT_OUT_OF_RANGE_see_docs> not found while processing module instance <g_bad_count.u_invalid> [C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/top.sv:48]
+ERROR: [VRFC 10-2787] module security_engine(PRODUCT_COUNT=33) ignored due to previous errors [C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/security_engine.sv:3]
+ERROR: [VRFC 10-2787] module inventory_manager(PRODUCT_COUNT=33) ignored due to previous errors [C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/inventory_manager.sv:3]
+ERROR: [VRFC 10-2787] module crc8(DATA_WIDTH=40) ignored due to previous errors [C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/crc8.sv:3]
+ERROR: [XSIM 43-3322] Static elaboration of top level Verilog design unit(s) in library work failed.

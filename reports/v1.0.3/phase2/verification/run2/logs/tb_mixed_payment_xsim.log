@@ -1,0 +1,147 @@
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_mixed_payment_snap/xsim_script.tcl
+# xsim {tb_mixed_payment_snap} -testplusarg REPORT_DIR=C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/build/reports/tb_mixed_payment -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+
+======================================================================================================================================================================================================
+                                                                               SECURE VENDING MACHINE CONTROLLER
+                                                                              SYSTEMVERILOG DIRECTED VERIFICATION
+======================================================================================================================================================================================================
+ Verification Environment : Self-Checking Testbench
+ Payment Modes            : COIN | NOTE | RFID | CARD | UPI | WALLET
+ Features                 : Assertions | Latency | Statistics | CSV Report
+ Test Cases               : (see summary below)
+======================================================================================================================================================================================================
+
+======================================================================================================================================================================================================
+                                                                                   MULTI PAYMENT VERIFICATION REPORT                                                                                  
+======================================================================================================================================================================================================
+|Test |                 Scenario                   |           Time(ns) |Lat(C)|TxnID|CRC |Payment|PID|Qty(C)|Price|Amount|        Status        |           Error        |Disp|Refund|Qty(U)|Result|
+======================================================================================================================================================================================================
+|   1 |             Controller in IDLE after Reset |85|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|   2 |                    Balance = 0 after Reset |85|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|   3 |               Response Invalid after Reset |85|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|   4 |                               Coin Payment |205|    11|    1|0097|   COIN|  0|    20|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    19|  PASS|
+|   5 |                               Note Payment |325|    11|    2|0026|   NOTE|  1|    20|   20|    20|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    19|  PASS|
+|   6 |                               RFID Payment |445|    11|    3|00a0|   RFID|  2|    20|   30|    30|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    19|  PASS|
+|   7 |                               Card Payment |565|    11|    4|0043|   CARD|  3|    20|   40|    40|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    19|  PASS|
+|   8 |                                UPI Payment |685|    11|    5|00d5|    UPI|  4|    20|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    19|  PASS|
+|   9 |                             Wallet Payment |805|    11|    6|0071| WALLET|  0|    19|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    18|  PASS|
+|  10 |                           Mixed Seq - Coin |925|    11|    7|0085|   COIN|  0|    18|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    17|  PASS|
+|  11 |                           Mixed Seq - Card |1045|    11|    8|00d8|   CARD|  1|    19|   20|    20|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    18|  PASS|
+|  12 |                            Mixed Seq - UPI |1165|    11|    9|00c9|    UPI|  2|    19|   30|    30|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    18|  PASS|
+|  13 |                           Mixed Seq - RFID |1285|    11|   10|000d|   RFID|  3|    19|   40|    40|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    18|  PASS|
+|  14 |                           Mixed Seq - Note |1405|    11|   11|000c|   NOTE|  4|    19|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    18|  PASS|
+|  15 |                         Mixed Seq - Wallet |1525|    11|   12|0047| WALLET|  0|    17|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    16|  PASS|
+|  16 |                Duplicate First Transaction |1645|    11|  100|0007|   CARD|  0|    16|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    15|  PASS|
+|  17 |                      Duplicate Transaction |1735|     8|  100|0007|   CARD|  0|    15|   10|    10|    TRANSACTION FAILED|   DUPLICATE TRANSACTION|   0|     0|    15|  PASS|
+|  18 |                             CRC Corruption |1825|     8|  100|00c3|    UPI|  0|    15|   10|    10|    TRANSACTION FAILED|               CRC ERROR|   0|     0|    15|  PASS|
+|  19 |                           Stock Purchase 1 |1945|    11|  101|0065|   COIN|  4|    18|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    17|  PASS|
+|  20 |                           Stock Purchase 2 |2065|    11|  102|0008|   NOTE|  4|    17|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    16|  PASS|
+|  21 |                           Stock Purchase 3 |2185|    11|  103|00a3|   RFID|  4|    16|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    15|  PASS|
+|  22 |                           Stock Purchase 4 |2305|    11|  104|00ea|   CARD|  4|    15|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    14|  PASS|
+|  23 |                           Stock Purchase 5 |2425|    11|  105|00d6|    UPI|  4|    14|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    13|  PASS|
+|  24 |                           Stock Purchase 6 |2545|    11|  106|00bb| WALLET|  4|    13|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    12|  PASS|
+|  25 |                           Stock Purchase 7 |2665|    11|  107|004f|   COIN|  4|    12|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    11|  PASS|
+|  26 |                           Stock Purchase 8 |2785|    11|  108|003e|   NOTE|  4|    11|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    10|  PASS|
+|  27 |                           Stock Purchase 9 |2905|    11|  109|0095|   RFID|  4|    10|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     9|  PASS|
+|  28 |                          Stock Purchase 10 |3025|    11|  110|00f8|   CARD|  4|     9|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     8|  PASS|
+|  29 |                          Stock Purchase 11 |3145|    11|  111|00c4|    UPI|  4|     8|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     7|  PASS|
+|  30 |                          Stock Purchase 12 |3265|    11|  112|00fd| WALLET|  4|     7|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     6|  PASS|
+|  31 |                          Stock Purchase 13 |3385|    11|  113|0009|   COIN|  4|     6|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     5|  PASS|
+|  32 |                          Stock Purchase 14 |3505|    11|  114|0064|   NOTE|  4|     5|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     4|  PASS|
+|  33 |                          Stock Purchase 15 |3625|    11|  115|00cf|   RFID|  4|     4|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     3|  PASS|
+|  34 |                          Stock Purchase 16 |3745|    11|  116|00be|   CARD|  4|     3|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     2|  PASS|
+|  35 |                          Stock Purchase 17 |3865|    11|  117|0082|    UPI|  4|     2|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     1|  PASS|
+|  36 |                          Stock Purchase 18 |3985|    11|  118|00ef| WALLET|  4|     1|   50|    50|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|     0|  PASS|
+|  37 |                          Stock Purchase 19 |4105|    11|  119|001b|   COIN|  4|     0|   50|    50|    TRANSACTION FAILED|            OUT OF STOCK|   0|    50|     0|  PASS|
+|  38 |                          Stock Purchase 20 |4225|    11|  120|0052|   NOTE|  4|     0|   50|    50|    TRANSACTION FAILED|            OUT OF STOCK|   0|    50|     0|  PASS|
+|  39 |                     Inventory Product4 = 0 |4225|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  40 |                 Purchase After Stock Empty |4345|    11|  121|009d|   CARD|  4|     0|   50|    50|    TRANSACTION FAILED|            OUT OF STOCK|   0|    50|     0|  PASS|
+|  41 |     Handshake Test A: Single Txn (Coin P0) |4465|    11|  122|00f1|   COIN|  0|    15|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    14|  PASS|
+|  42 |         Test A: Inventory Decremented by 1 |4465|     -|    -|   -|      -|  -|    14|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  43 |        Test A: Controller Returned to IDLE |4465|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  44 |    Test B: Txn 1 (Card) Response In-Flight |4600|    11|  124|0085|   CARD|  1|    18|   20|    20|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    17|  PASS|
+|  45 |      Test B: P1 Inventory Decremented by 1 |4600|     -|    -|   -|      -|  -|    17|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  46 |Test B: Second Request Accepted Exactly Once (monitor) |4600|     -|    -|   -|      -|  -|     1|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  47 |    Test B: Txn 2 (UPI) Completed Correctly |4685|    11|  124|0085|    UPI|  2|    18|   30|    30|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    17|  PASS|
+|  48 |      Test B: P2 Inventory Decremented by 1 |4685|     -|    -|   -|      -|  -|    17|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  49 |                  Test B: Final Balance = 0 |4685|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  50 |       Test C: Contention Txn 1 (WALLET P3) |4805|    11|  125|0074| WALLET|  3|    18|   40|    40|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    17|  PASS|
+|  51 |         Test C: Contention Txn 2 (NOTE P0) |4925|    11|  126|0089|   NOTE|  0|    14|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    13|  PASS|
+|  52 |         Test C: Contention Txn 3 (RFID P1) |5045|    11|  127|00fe|   RFID|  1|    17|   20|    20|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    16|  PASS|
+|  53 |                 Test C: P3 Qty Decremented |5045|     -|    -|   -|      -|  -|    17|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  54 |                 Test C: P0 Qty Decremented |5045|     -|    -|   -|      -|  -|    13|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  55 |                 Test C: P1 Qty Decremented |5045|     -|    -|   -|      -|  -|    16|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  56 |           Test D: Background Txn (Coin P0) |5180|    11|  129|006e|   COIN|  0|    13|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    12|  PASS|
+|  57 |Test D: Blocked Request Accepted Exactly Once (monitor) |5180|     -|    -|   -|      -|  -|     1|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  58 |  Test D: DUT Captured Held Request Payload |5180|     -|    -|   -|      -|  -|     1|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  59 |Test D: Pending Request Completed (Card P1) |5265|    11|  129|006e|   CARD|  1|    16|   20|    20|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    15|  PASS|
+|  60 |                     Test D: P1 Decremented |5265|     -|    -|   -|      -|  -|    15|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  61 |            Test E: Ready is 0 during Reset |5280|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  62 |        Test E: Controller IDLE after Reset |5305|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  63 |    Test E: Ready is 1 after Reset Released |5305|     -|    -|   -|      -|  -|     1|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  64 |Test E: Balance Loaded Before Mid-Txn Reset (precondition) |5370|     -|    -|   -|      -|  -|    10|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  65 |   Test E: Balance Cleared on Mid-Txn Reset |5380|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  66 |   Test E: Controller IDLE on Mid-Txn Reset |5380|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  67 |Test E: No Response Emitted for Aborted Txn (KL-003) |5645|     -|    -|   -|      -|  -|     1|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  68 |     Test E: Clean Recovery Txn After Reset |5765|    11|    1|00f3|   NOTE|  0|    20|   10|    10|   TRANSACTION SUCCESS|                NO ERROR|   1|     0|    19|  PASS|
+|  69 |      Test E: Post-Recovery Controller IDLE |5765|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  70 |                        Timeout Transaction |6035|    26|    2|0056|   RFID|  0|    19|   10|    10|   TRANSACTION TIMEOUT|     TRANSACTION TIMEOUT|   0|     0|    19|  PASS|
+|  71 |                          Final Balance = 0 |6035|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+|  72 |                Controller Returned to IDLE |6035|     -|    -|   -|      -|  -|     0|    -|     -|                     -|                       -|   -|     -|     0|  PASS|
+SVM_MONITOR: accepted=47 responses=46 aborted=1 wide_response_pulses=1
+SVM_KNOWN_LIMITATION: KL-002 response_valid stayed high for more than one cycle (1 extra cycle(s)); see docs/known-limitations.md
+======================================================================================================================================================================================================
+Total Tests            : 73
+Passed Tests           : 73
+Failed Tests           : 0
+Pass Percentage        : 100.00 %
+Simulation Time        : 6085 ns
+
+
+TRANSACTION STATISTICS
+-----------------------------
+Successful Transactions : 40
+Insufficient Balance    : 0
+CRC Errors              : 1
+Duplicate Transactions  : 1
+Transactions Timeout    : 1
+Stock Errors            : 3
+-----------------------------
+
+=============================
+    FINAL INVENTORY REPORT    
+=============================
+| Product | Price | Quantity |
+-----------------------------
+|   0     |    10 |       19 |
+|   1     |    20 |       20 |
+|   2     |    30 |       20 |
+|   3     |    40 |       20 |
+|   4     |    50 |       20 |
+=============================
+
+==============================================================================
+                        PAYMENT METHOD SUMMARY
+==============================================================================
+| Payment | Success | Failed | Timeout | Success % |
+------------------------------------------------------------------------------
+| COIN    |       7 |      1 |       0 |     0.00 % |
+| NOTE    |       7 |      1 |       0 |     0.00 % |
+| RFID    |       6 |      0 |       1 |     0.00 % |
+| CARD    |       8 |      2 |       0 |     0.00 % |
+| UPI     |       6 |      1 |       0 |     0.00 % |
+| WALLET  |       6 |      0 |       0 |     0.00 % |
+==============================================================================
+SVM_TB_RESULT: PASS total=73 passed=73 failed=0 tb_errors=0
+$finish called at time : 6085 ns : File "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/tb/tb_mixed_payment.sv" Line 1900
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 19 00:23:02 2026...

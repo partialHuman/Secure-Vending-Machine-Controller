@@ -1,0 +1,16 @@
+ M docs/Results.md
+ M docs/Verification_Methodology.md
+ M docs/known-limitations.md
+ M rtl/inventory_manager.sv
+ M rtl/payment_interface.sv
+ M rtl/security_engine.sv
+ M rtl/top.sv
+ M rtl/transaction_controller.sv
+ M rtl/transaction_pkg.sv
+ M scripts/expected_checks.txt
+ M scripts/run_regression.tcl
+ M tb/tb_handshake_security.sv
+ M tb/tb_mixed_payment.sv
+?? tb/tb_inventory_manager.sv
+?? tb/tb_product_count.sv
+?? tb/tb_product_count_invalid.sv

@@ -1,0 +1,325 @@
+
+================================================================================
+Secure Vending Machine Controller v1.0.3 - Vivado 2018.2 Compatibility Probes
+Timestamp: 2026-11-17 23:17:25 +05:30
+Host OS: Microsoft Windows 11 Pro 64-bit
+Working Directory: C:\Users\User\Documents\Projects\v1.0.3-phase0-1\probes
+Vivado Bin Path: D:\Xilinx\Vivado\2018.2\bin
+================================================================================
+
+--- SECTION 1: ENVIRONMENT VERIFICATION ---
+Command: vivado.bat -version
+Exit Code: 0
+Output:
+Vivado v2018.2 (64-bit)
+SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+Command: xvlog.bat --version
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+
+Command: xelab.bat --version
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+
+Command: xsim.bat -version
+Exit Code: 1
+Output:
+Vivado Simulator 2018.2
+
+Command: vivado.bat -mode batch -nojournal -nolog -source C:\Users\User\Documents\Projects\v1.0.3-phase0-1\reports\logs\env_verify.tcl
+Exit Code: 0
+Output:
+
+****** Vivado v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source {C:\Users\User\Documents\Projects\v1.0.3-phase0-1\reports\logs\env_verify.tcl}
+# puts "=== TCL VERSION OUTPUT ==="
+=== TCL VERSION OUTPUT ===
+# puts [version]
+Vivado v2018.2 (64-bit)
+SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+# puts "=== TCL EXEC XVLOG ==="
+=== TCL EXEC XVLOG ===
+# puts [exec xvlog --version]
+Vivado Simulator 2018.2
+# puts "=== TCL EXEC XELAB ==="
+=== TCL EXEC XELAB ===
+# puts [exec xelab --version]
+Vivado Simulator 2018.2
+# puts "=== TCL EXEC XSIM -version (CATCH) ==="
+=== TCL EXEC XSIM -version (CATCH) ===
+# set rc [catch {exec xsim -version 2>@1} msg opts]
+# puts "xsim -version catch result: $rc, errorcode: [dict get $opts -errorcode], msg: $msg"
+xsim -version catch result: 1, errorcode: CHILDSTATUS 23624 1, msg: Vivado Simulator 2018.2
+child process exited abnormally
+# exit
+INFO: [Common 17-206] Exiting Vivado at Tue Nov 17 23:17:34 2026...
+
+--- SECTION 2: COMPILATION OF ALL PROBE FILES ---
+Command: xvlog -sv probe_a_elab_error.sv probe_b_undefined_module.sv probe_c_runtime_fatal.sv probe_d_param_features.sv probe_e_depth_and_functions.sv
+Exit Code: 0
+Output:
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_a_elab_error.sv" into library work
+INFO: [VRFC 10-311] analyzing module probe_a_core
+INFO: [VRFC 10-311] analyzing module probe_a_ok
+INFO: [VRFC 10-311] analyzing module probe_a_bad
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_b_undefined_module.sv" into library work
+INFO: [VRFC 10-311] analyzing module probe_b_core
+INFO: [VRFC 10-311] analyzing module probe_b_ok
+INFO: [VRFC 10-311] analyzing module probe_b_bad
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_c_runtime_fatal.sv" into library work
+INFO: [VRFC 10-311] analyzing module probe_c_core
+INFO: [VRFC 10-311] analyzing module probe_c_ok
+INFO: [VRFC 10-311] analyzing module probe_c_bad
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_d_param_features.sv" into library work
+INFO: [VRFC 10-311] analyzing module probe_d_dut
+INFO: [VRFC 10-311] analyzing module probe_d_tb
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_e_depth_and_functions.sv" into library work
+INFO: [VRFC 10-311] analyzing module probe_e_dut
+INFO: [VRFC 10-311] analyzing module probe_e_tb
+
+--- SECTION 3: PROBE A ---
+Command: xelab probe_a_ok -s pa_ok
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_a_ok -s pa_ok 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_a_core_default
+Compiling module work.probe_a_ok
+Built simulation snapshot pa_ok
+
+Command: xelab probe_a_bad -s pa_bad
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_a_bad -s pa_bad 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+WARNING: [#UNDEF] PROBE_A: N=0 is outside 1..32 [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_a_elab_error.sv:7]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_a_core(N=0)
+Compiling module work.probe_a_bad
+Built simulation snapshot pa_bad
+
+Command (diagnostic check on pa_bad simulation): xsim pa_bad -runall
+Exit Code: 0
+Output:
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/pa_bad/xsim_script.tcl
+# xsim {pa_bad} -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Nov 17 23:17:41 2026...
+
+--- SECTION 4: PROBE B ---
+Command: xelab probe_b_ok -s pb_ok
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_b_ok -s pb_ok 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_b_core_default
+Compiling module work.probe_b_ok
+Built simulation snapshot pb_ok
+
+Command: xelab probe_b_bad -s pb_bad
+Exit Code: 1
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_b_bad -s pb_bad 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+ERROR: [VRFC 10-2063] Module <PRODUCT_COUNT_OUT_OF_RANGE_see_docs> not found while processing module instance <g_bad_count.u_invalid> [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_b_undefined_module.sv:7]
+ERROR: [XSIM 43-3322] Static elaboration of top level Verilog design unit(s) in library work failed.
+
+--- SECTION 5: PROBE C ---
+Command: xelab probe_c_ok -s pc_ok
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_c_ok -s pc_ok 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_c_core
+Compiling module work.probe_c_ok
+Built simulation snapshot pc_ok
+
+Command: xsim pc_ok -runall
+Exit Code: 0
+Output:
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/pc_ok/xsim_script.tcl
+# xsim {pc_ok} -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+PROBE_C_OK
+$finish called at time : 10 ns : File "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_c_runtime_fatal.sv" Line 10
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Nov 17 23:17:48 2026...
+
+Command: xelab probe_c_bad -s pc_bad
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_c_bad -s pc_bad 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_c_core(N=0)
+Compiling module work.probe_c_bad
+Built simulation snapshot pc_bad
+
+Command: xsim pc_bad -runall
+Exit Code: 0
+Output:
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/pc_bad/xsim_script.tcl
+# xsim {pc_bad} -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+Fatal: PROBE_C: N=0 is outside 1..32
+Time: 0 ps  Iteration: 0  Process: /probe_c_bad/u/Initial5_0  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_c_runtime_fatal.sv
+$finish called at time : 0 fs
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Nov 17 23:17:52 2026...
+
+--- SECTION 6: PROBE D ---
+Command: xelab probe_d_tb -s pd
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_d_tb -s pd 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_d_dut(PC=8)
+Compiling module work.probe_d_tb
+Compiling package work.probe_pkg
+Built simulation snapshot pd
+
+Command: xsim pd -runall
+Exit Code: 0
+Output:
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/pd/xsim_script.tcl
+# xsim {pd} -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+PROBE_D dut: PC=8 MAX=32 rd(out-of-range)=0
+PROBE_D tb reads dut.PC=8 (expect 8)
+$finish called at time : 2 ns : File "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_d_param_features.sv" Line 30
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Nov 17 23:17:57 2026...
+
+--- SECTION 7: PROBE E ---
+Command: xelab probe_e_tb -s pe
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_e_tb -s pe 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+WARNING: [VRFC 10-1783] select index 8 into qty_mem is out of bounds [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_e_depth_and_functions.sv:29]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_e_dut_default
+Compiling module work.probe_e_tb
+Compiling package work.probe_e_pkg
+Built simulation snapshot pe
+
+Command: xsim pe -runall
+Exit Code: 0
+Output:
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/pe/xsim_script.tcl
+# xsim {pe} -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+PROBE_E1 size    = 8 (expect 8)
+PROBE_E1 bits    = 64 (expect 64)
+PROBE_E2 oob read isunknown = 1 (expect 1)
+PROBE_E2 last valid = 20 (expect 20)
+PROBE_E3 dut.DEPTH = 8 (expect 8)
+PROBE_E4 safe_count(0)=1 safe_count(33)=32 safe_count(5)=5 (expect 1 32 5)
+$finish called at time : 1 ns : File "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/probe_e_depth_and_functions.sv" Line 34
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Nov 17 23:18:01 2026...
+
+================================================================================
+Probe execution complete. Log written to C:\Users\User\Documents\Projects\v1.0.3-phase0-1\reports\logs\probe_execution_raw.log
+================================================================================

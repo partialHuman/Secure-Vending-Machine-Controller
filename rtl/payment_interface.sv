@@ -19,7 +19,7 @@ module payment_interface
     // Handshake
     //--------------------------------------------------
 
-    input  logic arbiter_ready,
+    input  logic accept_ready,
 
     //--------------------------------------------------
     // Output Packet
@@ -77,7 +77,7 @@ begin
 
         //----------------------------------------------
 
-        if(request_valid && arbiter_ready)
+        if(request_valid && accept_ready)
         begin
 
             packet.payment_type <= request.payment_type;

@@ -1,5 +1,7 @@
 # Verification Methodology — v1.0.1 Post-Audit Hardening
 
+> **Historical Configuration Banner:** This document reflects the historical v1.0.1 verification baseline (`PRODUCTS = 32`); for v1.0.3 parameter architecture and verification, see the v1.0.3 documentation and testbenches.
+
 ## Overview
 
 The Secure Vending Machine Controller was verified using an upgraded **SystemVerilog directed self-checking verification environment**. Following a hardware security audit, the verification strategy was significantly hardened to validate the **Option A Valid/Ready Handshake Protocol**, ensure robust **response-to-request transaction tracking**, verify **pipeline immunity under in-flight contention**, and detect edge-case security vulnerabilities.

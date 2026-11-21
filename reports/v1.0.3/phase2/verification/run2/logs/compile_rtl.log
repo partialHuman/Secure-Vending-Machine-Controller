@@ -1,0 +1,21 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/transaction_pkg.sv" into library work
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/crc8.sv" into library work
+INFO: [VRFC 10-311] analyzing module crc8
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/payment_interface.sv" into library work
+INFO: [VRFC 10-311] analyzing module payment_interface
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/payment_arbiter.sv" into library work
+INFO: [VRFC 10-311] analyzing module payment_arbiter
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/security_engine.sv" into library work
+INFO: [VRFC 10-311] analyzing module security_engine
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/timeout_controller.sv" into library work
+INFO: [VRFC 10-311] analyzing module timeout_controller
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/balance_manager.sv" into library work
+INFO: [VRFC 10-311] analyzing module balance_manager
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/inventory_manager.sv" into library work
+INFO: [VRFC 10-311] analyzing module inventory_manager
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/transaction_controller.sv" into library work
+INFO: [VRFC 10-311] analyzing module transaction_controller
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/response_generator.sv" into library work
+INFO: [VRFC 10-311] analyzing module response_generator
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/rtl/top.sv" into library work
+INFO: [VRFC 10-311] analyzing module top

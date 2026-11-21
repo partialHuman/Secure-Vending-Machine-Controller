@@ -1,0 +1,270 @@
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_handshake_security_snap/xsim_script.tcl
+# xsim {tb_handshake_security_snap} -testplusarg REPORT_DIR=C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/build/reports/tb_handshake_security -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+================================================================
+   SECURE VENDING MACHINE CONTROLLER - SECURITY TESTBENCH
+================================================================
+
+--- TEST 1: Reset & Handshake Gate ---
+[SEC_TEST PASS] Test 1: request_ready is deasserted (0) during reset
+[SEC_TEST PASS] Test 1: packet_valid remains 0 while in reset (reset-dominated; the gate check is request_ready==0 above)
+[SEC_TEST PASS] Test 1: Controller in IDLE after reset deassertion
+[SEC_TEST PASS] Test 1: request_ready is asserted (1) when reset released into IDLE
+[SEC_TEST PASS] Test 1: Balance initialized to 0
+
+--- TEST 2: Baseline Option A Single Transaction ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 2: Txn Status SUCCESS
+[SEC_TEST PASS] Test 2: Txn Error ERR_NONE
+[SEC_TEST PASS] Test 2: Dispense Asserted
+[SEC_TEST PASS] Test 2: Refund is 0
+[SEC_TEST PASS] Test 2: Product 0 Qty decremented by 1
+[SEC_TEST PASS] Test 2: Balance cleared to 0
+[SEC_TEST PASS] Test 2: Controller returned to IDLE
+
+--- TEST 3: In-Flight Contention & Level-Sensitive Security Check ---
+[SEC_TEST PASS] Test 3: Txn 1 completed with response while Txn 2 held off
+[SEC_TEST PASS] Test 3: Busy cycles observed (> 5)
+[SEC_TEST PASS] Test 3: Txn 2 accepted exactly once after Txn 1 (monitor)
+[SEC_TEST PASS] Test 3: Txn 1 (CARD) Status SUCCESS
+[SEC_TEST PASS] Test 3: Txn 1 (CARD) Error ERR_NONE (No Duplicate/CRC rejection)
+[SEC_TEST PASS] Test 3: Txn 1 (CARD) Dispense 1
+[SEC_TEST PASS] Test 3: Product 1 decremented by 1
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 3: Txn 2 (UPI) Status SUCCESS
+[SEC_TEST PASS] Test 3: Txn 2 (UPI) Error ERR_NONE
+[SEC_TEST PASS] Test 3: Txn 2 (UPI) Dispense 1
+[SEC_TEST PASS] Test 3: Product 2 decremented by 1
+[SEC_TEST PASS] Test 3: Balance 0 after both contention txns
+
+--- TEST 4: Security Rule ERR_AUTH ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 4: High amount CARD rejected with STATUS_FAILED
+[SEC_TEST PASS] Test 4: High amount CARD rejected with ERR_AUTH
+[SEC_TEST PASS] Test 4: Dispense is 0
+[SEC_TEST PASS] Test 4: Balance cleared after ERR_AUTH
+[SEC_TEST PASS] Test 4: Controller returned to IDLE
+
+--- TEST 5: Security Rule ERR_INVALID_PRODUCT ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 5: Out of bounds PID rejected with STATUS_FAILED
+[SEC_TEST PASS] Test 5: Out of bounds PID rejected with ERR_INVALID_PRODUCT
+[SEC_TEST PASS] Test 5: Dispense is 0
+[SEC_TEST PASS] Test 5: Controller returned to IDLE
+
+--- TEST 6: Security Rule ERR_BALANCE (Zero Amount) ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 6: Zero amount rejected with STATUS_FAILED
+[SEC_TEST PASS] Test 6: Zero amount rejected with ERR_BALANCE
+[SEC_TEST PASS] Test 6: Dispense is 0
+[SEC_TEST PASS] Test 6: Controller returned to IDLE
+
+--- TEST 7: Mid-Transaction Reset & Clean Recovery ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Test 7: Balance loaded before reset (precondition, non-vacuous)
+[SEC_TEST PASS] Test 7: Balance cleared on mid-transaction reset
+[SEC_TEST PASS] Test 7: Controller returned to IDLE on reset
+[SEC_TEST PASS] Test 7: request_ready is 0 during reset
+[SEC_TEST PASS] Test 7: request_ready is 1 after reset release
+[SEC_TEST PASS] Test 7: No response emitted for the aborted transaction (KL-003)
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 7: Recovery transaction succeeds with STATUS_SUCCESS
+[SEC_TEST PASS] Test 7: Recovery transaction dispensed product
+[SEC_TEST PASS] Test 7: Final Controller state is IDLE
+
+--- TEST 8: Reset at several points of an in-flight transaction ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Test 8[k=3]: balance loaded before reset (precondition)
+[SEC_TEST PASS] Test 8[k=3]: balance cleared by reset
+[SEC_TEST PASS] Test 8[k=3]: controller IDLE after reset
+[SEC_TEST PASS] Test 8[k=3]: stock restored to initial value by reset (KL-003)
+[SEC_TEST PASS] Test 8[k=3]: no response emitted for aborted transaction
+[SEC_TEST PASS] Test 8[k=3]: request_ready is 1 after recovery
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Test 8[k=5]: balance loaded before reset (precondition)
+[SEC_TEST PASS] Test 8[k=5]: balance cleared by reset
+[SEC_TEST PASS] Test 8[k=5]: controller IDLE after reset
+[SEC_TEST PASS] Test 8[k=5]: stock restored to initial value by reset (KL-003)
+[SEC_TEST PASS] Test 8[k=5]: no response emitted for aborted transaction
+[SEC_TEST PASS] Test 8[k=5]: request_ready is 1 after recovery
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Test 8[k=8]: balance loaded before reset (precondition)
+[SEC_TEST PASS] Test 8[k=8]: balance cleared by reset
+[SEC_TEST PASS] Test 8[k=8]: controller IDLE after reset
+[SEC_TEST PASS] Test 8[k=8]: stock restored to initial value by reset (KL-003)
+[SEC_TEST PASS] Test 8[k=8]: no response emitted for aborted transaction
+[SEC_TEST PASS] Test 8[k=8]: request_ready is 1 after recovery
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Test 8[k=9]: purchase already completed before reset (precondition)
+[SEC_TEST PASS] Test 8[k=9]: balance cleared by reset
+[SEC_TEST PASS] Test 8[k=9]: controller IDLE after reset
+[SEC_TEST PASS] Test 8[k=9]: stock restored to initial value by reset (KL-003)
+[SEC_TEST PASS] Test 8[k=9]: no response emitted for aborted transaction
+[SEC_TEST PASS] Test 8[k=9]: request_ready is 1 after recovery
+
+--- TEST 9: Boundary values ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: product 4 (highest valid ID), exact payment 50: status
+[SEC_TEST PASS] Test 9: product 4 (highest valid ID), exact payment 50: error
+[SEC_TEST PASS] Test 9: product 4 (highest valid ID), exact payment 50: dispense
+[SEC_TEST PASS] Test 9: product 4 (highest valid ID), exact payment 50: refund
+[SEC_TEST PASS] Test 9: product 4 (highest valid ID), exact payment 50: inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: product 5 (first invalid ID): status
+[SEC_TEST PASS] Test 9: product 5 (first invalid ID): error
+[SEC_TEST PASS] Test 9: product 5 (first invalid ID): dispense
+[SEC_TEST PASS] Test 9: product 5 (first invalid ID): inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: product 31 (highest encodable ID): status
+[SEC_TEST PASS] Test 9: product 31 (highest encodable ID): error
+[SEC_TEST PASS] Test 9: product 31 (highest encodable ID): dispense
+[SEC_TEST PASS] Test 9: product 31 (highest encodable ID): inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: price-1 (19 for price 20) is refunded: status
+[SEC_TEST PASS] Test 9: price-1 (19 for price 20) is refunded: error
+[SEC_TEST PASS] Test 9: price-1 (19 for price 20) is refunded: dispense
+[SEC_TEST PASS] Test 9: price-1 (19 for price 20) is refunded: refund
+[SEC_TEST PASS] Test 9: price-1 (19 for price 20) is refunded: inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: exact price (20 for price 20): status
+[SEC_TEST PASS] Test 9: exact price (20 for price 20): error
+[SEC_TEST PASS] Test 9: exact price (20 for price 20): dispense
+[SEC_TEST PASS] Test 9: exact price (20 for price 20): refund
+[SEC_TEST PASS] Test 9: exact price (20 for price 20): inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: price+1 (21 for price 20): status
+[SEC_TEST PASS] Test 9: price+1 (21 for price 20): error
+[SEC_TEST PASS] Test 9: price+1 (21 for price 20): dispense
+[SEC_TEST PASS] Test 9: price+1 (21 for price 20): inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: CARD at the 5000 limit: status
+[SEC_TEST PASS] Test 9: CARD at the 5000 limit: error
+[SEC_TEST PASS] Test 9: CARD at the 5000 limit: dispense
+[SEC_TEST PASS] Test 9: CARD at the 5000 limit: inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: CARD above the 5000 limit (5001): status
+[SEC_TEST PASS] Test 9: CARD above the 5000 limit (5001): error
+[SEC_TEST PASS] Test 9: CARD above the 5000 limit (5001): dispense
+[SEC_TEST PASS] Test 9: CARD above the 5000 limit (5001): inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: maximum amount 65535: status
+[SEC_TEST PASS] Test 9: maximum amount 65535: error
+[SEC_TEST PASS] Test 9: maximum amount 65535: dispense
+[SEC_TEST PASS] Test 9: maximum amount 65535: inventory change
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 1 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 2 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 3 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 4 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 5 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 6 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 7 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 8 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 9 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 10 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 11 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 12 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 13 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 14 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 15 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 16 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 17 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 18 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 19 of 20 succeeds
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: stock purchase 20 of 20 succeeds
+[SEC_TEST PASS] Test 9: stock reached exactly 0
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+[SEC_TEST PASS] Test 9: purchase at stock 0: status
+[SEC_TEST PASS] Test 9: purchase at stock 0: error
+[SEC_TEST PASS] Test 9: purchase at stock 0: dispense
+[SEC_TEST PASS] Test 9: purchase at stock 0: refund
+[SEC_TEST PASS] Test 9: purchase at stock 0: inventory change
+[SEC_TEST PASS] Test 9: stock still 0 (never negative)
+
+--- TEST 10: Known-limitation observations (see docs/known-limitations.md) ---
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+SVM_KNOWN_LIMITATION: KL-001 overpayment succeeded but refund field is 0 (change not returned)
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+SVM_KNOWN_LIMITATION: KL-004 payment_type 6 (undefined) was accepted and dispensed
+[SEC_TEST PASS] Driver Handshake: Request accepted within watchdog
+[SEC_TEST PASS] Response Received: response_valid asserted within watchdog
+SVM_KNOWN_LIMITATION: KL-004 payment_type 7 (undefined) was accepted and dispensed
+[SEC_TEST PASS] Test 10: Controller IDLE after observations
+SVM_MONITOR: accepted=45 responses=40 aborted=5 wide_response_pulses=0
+
+================================================================
+   SECURITY TESTBENCH SUMMARY
+================================================================
+Total Checks : 220
+Passed Checks: 220
+Failed Checks: 0
+TB Errors    : 0
+================================================================
+SVM_TB_RESULT: PASS total=220 passed=220 failed=0 tb_errors=0
+$finish called at time : 6385 ns : File "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/tb/tb_handshake_security.sv" Line 630
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 19 00:23:15 2026...

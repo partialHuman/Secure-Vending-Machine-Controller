@@ -1,0 +1,256 @@
+Created At: 2026-11-19T00:29:56+05:30
+Completed At: 2026-11-19T00:30:03+05:30
+Command exited with code 0.
+
+Command output:
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/transaction_pkg.sv" into library work
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/crc8.sv" into library work
+INFO: [VRFC 10-311] analyzing module crc8
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/payment_interface.sv" into library work
+INFO: [VRFC 10-311] analyzing module payment_interface
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/payment_arbiter.sv" into library work
+INFO: [VRFC 10-311] analyzing module payment_arbiter
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/security_engine.sv" into library work
+INFO: [VRFC 10-311] analyzing module security_engine
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/timeout_controller.sv" into library work
+INFO: [VRFC 10-311] analyzing module timeout_controller
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/balance_manager.sv" into library work
+INFO: [VRFC 10-311] analyzing module balance_manager
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/inventory_manager.sv" into library work
+INFO: [VRFC 10-311] analyzing module inventory_manager
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/transaction_controller.sv" into library work
+INFO: [VRFC 10-311] analyzing module transaction_controller
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/response_generator.sv" into library work
+INFO: [VRFC 10-311] analyzing module response_generator
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/top.sv" into library work
+INFO: [VRFC 10-311] analyzing module top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv" into library work
+INFO: [VRFC 10-311] analyzing module tb_product_count
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe -debug typical tb_product_count -s sim_mut1 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+WARNING: [VRFC 10-1770] port debug_packet remains unconnected for this instance [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:51]
+WARNING: [VRFC 10-1770] port debug_packet remains unconnected for this instance [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:63]
+WARNING: [VRFC 10-1770] port debug_packet remains unconnected for this instance [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:75]
+WARNING: [VRFC 10-1770] port debug_packet remains unconnected for this instance [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:87]
+WARNING: [VRFC 10-1770] port debug_packet remains unconnected for this instance [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:99]
+WARNING: [VRFC 10-1783] select index 5 into qty_mem is out of bounds [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:463]
+WARNING: [VRFC 10-1783] select index 7 into qty_mem is out of bounds [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:467]
+WARNING: [VRFC 10-1783] select index 15 into qty_mem is out of bounds [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:490]
+WARNING: [VRFC 10-1783] select index 31 into qty_mem is out of bounds [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv:494]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.crc8(DATA_WIDTH=40)
+Compiling module work.payment_interface
+Compiling module work.payment_arbiter
+Compiling module work.security_engine(PRODUCT_COUNT=1)
+Compiling module work.timeout_controller
+Compiling module work.balance_manager
+Compiling module work.inventory_manager(PRODUCT_COUNT=...
+Compiling module work.transaction_controller
+Compiling module work.response_generator
+Compiling module work.top(PRODUCT_COUNT=1)
+Compiling module work.security_engine(PRODUCT_COUNT=4)
+Compiling module work.top(PRODUCT_COUNT=4)
+Compiling module work.security_engine(PRODUCT_COUNT=5)
+Compiling module work.top(PRODUCT_COUNT=5)
+Compiling module work.security_engine(PRODUCT_COUNT=8)
+Compiling module work.top(PRODUCT_COUNT=8)
+Compiling module work.security_engine(PRODUCT_COUNT=32...
+Compiling module work.top(PRODUCT_COUNT=32)
+Compiling module work.tb_product_count
+Compiling package work.transaction_pkg
+Built simulation snapshot sim_mut1
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/sim_mut1/xsim_script.tcl
+# xsim {sim_mut1} -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+================================================================
+   PRODUCT_COUNT SYSTEM TESTBENCH (CONFIGS: 1, 4, 5, 8, 32)
+================================================================
+[PC_TEST PASS] CFG_1: parameter propagated to top
+[PC_TEST PASS] CFG_1: parameter propagated to sec
+Error: [PC_TEST FAIL] CFG_1: parameter propagated to inv
+Time: 36 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_1: inventory qty_mem depth is 1
+Time: 36 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_1: inventory price_mem depth is 1
+Time: 36 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+[PC_TEST PASS] CFG_1: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_1: Valid ID 0: response received
+[PC_TEST PASS] CFG_1: Valid ID 0: status matches
+[PC_TEST PASS] CFG_1: Valid ID 0: error matches
+[PC_TEST PASS] CFG_1: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_1: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: handshake accepted
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: response received
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: status matches
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: error matches
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: dispense matches
+[PC_TEST PASS] CFG_1: ID 0 qty unchanged after invalid ID 1
+[PC_TEST PASS] CFG_1: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_1: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_1: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_1: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_1: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_1: ID 0 qty unchanged after invalid ID 31
+[PC_TEST PASS] CFG_4: parameter propagated to top
+[PC_TEST PASS] CFG_4: parameter propagated to sec
+Error: [PC_TEST FAIL] CFG_4: parameter propagated to inv
+Time: 395 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_4: inventory qty_mem depth is 4
+Time: 395 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_4: inventory price_mem depth is 4
+Time: 395 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+[PC_TEST PASS] CFG_4: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_4: Valid ID 0: response received
+[PC_TEST PASS] CFG_4: Valid ID 0: status matches
+[PC_TEST PASS] CFG_4: Valid ID 0: error matches
+[PC_TEST PASS] CFG_4: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_4: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_4: Valid ID 3: handshake accepted
+[PC_TEST PASS] CFG_4: Valid ID 3: response received
+[PC_TEST PASS] CFG_4: Valid ID 3: status matches
+[PC_TEST PASS] CFG_4: Valid ID 3: error matches
+[PC_TEST PASS] CFG_4: Valid ID 3: dispense matches
+[PC_TEST PASS] CFG_4: ID 3 qty decremented to 19
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: handshake accepted
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: response received
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: status matches
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: error matches
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: dispense matches
+[PC_TEST PASS] CFG_4: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_4: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_4: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_4: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_4: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_5: parameter propagated to top
+[PC_TEST PASS] CFG_5: parameter propagated to sec
+[PC_TEST PASS] CFG_5: parameter propagated to inv
+[PC_TEST PASS] CFG_5: inventory qty_mem depth is 5
+[PC_TEST PASS] CFG_5: inventory price_mem depth is 5
+[PC_TEST PASS] CFG_5: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_5: Valid ID 0: response received
+[PC_TEST PASS] CFG_5: Valid ID 0: status matches
+[PC_TEST PASS] CFG_5: Valid ID 0: error matches
+[PC_TEST PASS] CFG_5: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_5: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_5: Valid ID 4: handshake accepted
+[PC_TEST PASS] CFG_5: Valid ID 4: response received
+[PC_TEST PASS] CFG_5: Valid ID 4: status matches
+[PC_TEST PASS] CFG_5: Valid ID 4: error matches
+[PC_TEST PASS] CFG_5: Valid ID 4: dispense matches
+[PC_TEST PASS] CFG_5: ID 4 qty decremented to 19
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: handshake accepted
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: response received
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: status matches
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: error matches
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: dispense matches
+[PC_TEST PASS] CFG_5: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_5: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_5: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_5: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_5: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_8: parameter propagated to top
+[PC_TEST PASS] CFG_8: parameter propagated to sec
+Error: [PC_TEST FAIL] CFG_8: parameter propagated to inv
+Time: 1395 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: inventory qty_mem depth is 8
+Time: 1395 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: inventory price_mem depth is 8
+Time: 1395 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+[PC_TEST PASS] CFG_8: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_8: Valid ID 0: response received
+[PC_TEST PASS] CFG_8: Valid ID 0: status matches
+[PC_TEST PASS] CFG_8: Valid ID 0: error matches
+[PC_TEST PASS] CFG_8: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_8: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_8: Valid ID 5 (exceeds default count 5): handshake accepted
+[PC_TEST PASS] CFG_8: Valid ID 5 (exceeds default count 5): response received
+Error: [PC_TEST FAIL] CFG_8: Valid ID 5 (exceeds default count 5): status matches
+Time: 1655 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: Valid ID 5 (exceeds default count 5): error matches
+Time: 1655 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: Valid ID 5 (exceeds default count 5): dispense matches
+Time: 1655 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: ID 5 qty decremented to 19
+Time: 1675 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+[PC_TEST PASS] CFG_8: Valid last ID 7: handshake accepted
+[PC_TEST PASS] CFG_8: Valid last ID 7: response received
+Error: [PC_TEST FAIL] CFG_8: Valid last ID 7: status matches
+Time: 1795 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: Valid last ID 7: error matches
+Time: 1795 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: Valid last ID 7: dispense matches
+Time: 1795 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_8: ID 7 qty decremented to 19
+Time: 1815 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: handshake accepted
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: response received
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: status matches
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: error matches
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: dispense matches
+[PC_TEST PASS] CFG_8: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_8: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_8: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_8: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_8: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_32: parameter propagated to top
+[PC_TEST PASS] CFG_32: parameter propagated to sec
+Error: [PC_TEST FAIL] CFG_32: parameter propagated to inv
+Time: 2035 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: inventory qty_mem depth is 32
+Time: 2035 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: inventory price_mem depth is 32
+Time: 2035 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+[PC_TEST PASS] CFG_32: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_32: Valid ID 0: response received
+[PC_TEST PASS] CFG_32: Valid ID 0: status matches
+[PC_TEST PASS] CFG_32: Valid ID 0: error matches
+[PC_TEST PASS] CFG_32: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_32: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_32: Valid ID 15: handshake accepted
+[PC_TEST PASS] CFG_32: Valid ID 15: response received
+Error: [PC_TEST FAIL] CFG_32: Valid ID 15: status matches
+Time: 2295 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: Valid ID 15: error matches
+Time: 2295 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: Valid ID 15: dispense matches
+Time: 2295 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: ID 15 qty decremented to 19
+Time: 2315 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+[PC_TEST PASS] CFG_32: Valid last ID 31: handshake accepted
+[PC_TEST PASS] CFG_32: Valid last ID 31: response received
+Error: [PC_TEST FAIL] CFG_32: Valid last ID 31: status matches
+Time: 2435 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: Valid last ID 31: error matches
+Time: 2435 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: Valid last ID 31: dispense matches
+Time: 2435 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+Error: [PC_TEST FAIL] CFG_32: ID 31 qty decremented to 19
+Time: 2455 ns  Iteration: 0  Process: /tb_product_count/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+================================================================
+   PRODUCT_COUNT TESTBENCH SUMMARY
+================================================================
+Total Checks : 133
+Passed Checks: 105
+Failed Checks: 28
+TB Errors    : 28
+================================================================
+SVM_TB_RESULT: FAIL total=133 passed=105 failed=28 tb_errors=28
+Fatal: tb_product_count reported failures
+Time: 2455 ns  Iteration: 0  Process: /tb_product_count/Initial363_72  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv
+$finish called at time : 2455 ns : File "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_product_count.sv" Line 511
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 19 00:30:03 2026...

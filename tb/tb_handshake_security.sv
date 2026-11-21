@@ -155,7 +155,10 @@ module tb_handshake_security;
                 active_txn.payment_type = payment;
                 active_txn.amount       = amount;
                 active_txn.product_id   = product;
-                active_txn.inv_before   = dut.u_inventory_manager.qty_mem[product];
+                if (product < PRODUCT_COUNT_DEFAULT)
+                    active_txn.inv_before   = dut.u_inventory_manager.qty_mem[product];
+                else
+                    active_txn.inv_before   = 8'd0;
                 active_txn.bal_before   = dut.u_balance_manager.current_balance;
             end
             else
@@ -223,8 +226,18 @@ module tb_handshake_security;
         response_packet_t rr;
         bit got;
         integer q_before;
+        logic [INVENTORY_WIDTH-1:0] snap_before [0:PRODUCT_COUNT_DEFAULT-1];
+        bit inv_ok;
+        integer k;
     begin
-        q_before = dut.u_inventory_manager.qty_mem[product];
+        for (k = 0; k < PRODUCT_COUNT_DEFAULT; k = k + 1)
+            snap_before[k] = dut.u_inventory_manager.qty_mem[k];
+
+        if (product < PRODUCT_COUNT_DEFAULT)
+            q_before = dut.u_inventory_manager.qty_mem[product];
+        else
+            q_before = 0;
+
         send_request(payment, amount, product);
         wait_response_sec(rr, got);
         check_condition($sformatf("%s: status", desc),   rr.status   == exp_status);
@@ -232,8 +245,17 @@ module tb_handshake_security;
         check_condition($sformatf("%s: dispense", desc), rr.dispense == exp_dispense);
         if (check_refund)
             check_condition($sformatf("%s: refund", desc), rr.refund == exp_refund);
-        check_condition($sformatf("%s: inventory change", desc),
-            dut.u_inventory_manager.qty_mem[product] == (exp_dispense ? q_before - 1 : q_before));
+
+        if (product < PRODUCT_COUNT_DEFAULT) begin
+            inv_ok = (dut.u_inventory_manager.qty_mem[product] == (exp_dispense ? q_before - 1 : q_before));
+        end else begin
+            inv_ok = 1'b1;
+            for (k = 0; k < PRODUCT_COUNT_DEFAULT; k = k + 1) begin
+                if (dut.u_inventory_manager.qty_mem[k] != snap_before[k])
+                    inv_ok = 1'b0;
+            end
+        end
+        check_condition($sformatf("%s: inventory change", desc), inv_ok);
     end
     endtask
 

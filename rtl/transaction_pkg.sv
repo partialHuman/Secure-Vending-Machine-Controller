@@ -14,7 +14,8 @@ package transaction_pkg;
     parameter int ERROR_WIDTH        = 8;
     parameter int TRANSACTION_WIDTH  = 16;
 
-    parameter int PRODUCT_COUNT      = 5;
+    parameter int PRODUCT_COUNT_DEFAULT = 5;
+    parameter int PRODUCT_COUNT_MAX     = 2**PRODUCT_ID_WIDTH; // 32
     parameter int INVENTORY_WIDTH    = 8;
     parameter int PRICE_WIDTH        = 16;
     parameter int CRC_WIDTH          = 8;

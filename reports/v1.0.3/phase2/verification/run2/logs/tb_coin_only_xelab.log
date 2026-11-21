@@ -1,0 +1,23 @@
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:\Xilinx\Vivado\2018.2\bin\unwrapped\win64.o\xelab.exe tb_coin_only -debug typical -s tb_coin_only_snap 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+WARNING: [VRFC 10-1770] port debug_packet remains unconnected for this instance [C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/tb/tb_coin_only.sv:31]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.crc8(DATA_WIDTH=40)
+Compiling module work.payment_interface
+Compiling module work.payment_arbiter
+Compiling module work.security_engine(PRODUCT_COUNT=5)
+Compiling module work.timeout_controller
+Compiling module work.balance_manager
+Compiling module work.inventory_manager(PRODUCT_COUNT=...
+Compiling module work.transaction_controller
+Compiling module work.response_generator
+Compiling module work.top_default
+Compiling module work.tb_coin_only
+Compiling package work.transaction_pkg
+Built simulation snapshot tb_coin_only_snap

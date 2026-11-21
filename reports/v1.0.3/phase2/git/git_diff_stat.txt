@@ -1,0 +1,14 @@
+ docs/Results.md                  |  2 ++
+ docs/Verification_Methodology.md |  2 ++
+ docs/known-limitations.md        |  2 +-
+ rtl/inventory_manager.sv         | 28 +++++++++++-------
+ rtl/payment_interface.sv         |  4 +--
+ rtl/security_engine.sv           | 12 +++++---
+ rtl/top.sv                       | 32 +++++++++++++++------
+ rtl/transaction_controller.sv    |  6 ++--
+ rtl/transaction_pkg.sv           |  3 +-
+ scripts/expected_checks.txt      |  6 ++--
+ scripts/run_regression.tcl       | 62 ++++++++++++++++++++++++++++++++++++----
+ tb/tb_handshake_security.sv      | 30 ++++++++++++++++---
+ tb/tb_mixed_payment.sv           |  6 ++--
+ 13 files changed, 151 insertions(+), 44 deletions(-)
