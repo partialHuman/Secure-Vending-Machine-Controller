@@ -1,0 +1,194 @@
+Command exited with code 0.
+
+Command output:
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/transaction_pkg.sv" into library work
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/rtl/inventory_manager.sv" into library work
+INFO: [VRFC 10-311] analyzing module inventory_manager
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv" into library work
+INFO: [VRFC 10-311] analyzing module tb_inventory_manager
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe -debug typical tb_inventory_manager -s sim_mut3 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.inventory_manager(PRODUCT_COUNT=...
+Compiling module work.inventory_manager(PRODUCT_COUNT=...
+Compiling module work.inventory_manager(PRODUCT_COUNT=...
+Compiling module work.inventory_manager(PRODUCT_COUNT=...
+Compiling module work.inventory_manager(PRODUCT_COUNT=...
+Compiling module work.tb_inventory_manager
+Compiling package work.transaction_pkg
+Built simulation snapshot sim_mut3
+
+****** Webtalk v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/xsim.dir/sim_mut3/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Thu Nov 19 00:34:07 2026...
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/sim_mut3/xsim_script.tcl
+# xsim {sim_mut3} -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+================================================================
+   INVENTORY MANAGER DIRECT UNIT TESTBENCH (D-103, D-108)
+================================================================
+[INV_TEST PASS] DUT_5: array size qty_mem is 5
+[INV_TEST PASS] DUT_5: array size price_mem is 5
+[INV_TEST PASS] DUT_5: array bits qty_mem is 40
+[INV_TEST PASS] DUT_5: reset price_mem[0] == 10
+[INV_TEST PASS] DUT_5: reset qty_mem[0] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[1] == 20
+[INV_TEST PASS] DUT_5: reset qty_mem[1] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[2] == 30
+[INV_TEST PASS] DUT_5: reset qty_mem[2] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[3] == 40
+[INV_TEST PASS] DUT_5: reset qty_mem[3] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[4] == 50
+[INV_TEST PASS] DUT_5: reset qty_mem[4] == 20
+[INV_TEST PASS] DUT_5: read ID 0 price == 10
+[INV_TEST PASS] DUT_5: read ID 0 quantity == 20
+[INV_TEST PASS] DUT_5: read ID 0 stock_available == 1
+[INV_TEST PASS] DUT_5: read ID 0 stock_ok == 1
+[INV_TEST PASS] DUT_5: read ID 0 low_stock == 0
+[INV_TEST PASS] DUT_5: read ID 4 price == 50
+[INV_TEST PASS] DUT_5: read ID 4 quantity == 20
+[INV_TEST PASS] DUT_5: read ID 4 stock_available == 1
+[INV_TEST PASS] DUT_5: read ID 4 stock_ok == 1
+[INV_TEST PASS] DUT_5: read ID 4 low_stock == 0
+[INV_TEST PASS] DUT_5: read_en=0 returns zero price
+[INV_TEST PASS] DUT_5: read_en=0 returns zero quantity
+[INV_TEST PASS] DUT_5: read_en=0 returns stock_ok=0
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 5 returns price=0
+Time: 30 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 5 returns quantity=0
+Time: 30 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 5 returns stock_available=0
+Time: 30 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 5 returns stock_ok=0
+Time: 30 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 5 returns low_stock=0
+Time: 30 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 31 returns price=0
+Time: 31 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 31 returns quantity=0
+Time: 31 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 31 returns stock_available=0
+Time: 31 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 31 returns stock_ok=0
+Time: 31 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_5: read invalid ID 31 returns low_stock=0
+Time: 31 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+[INV_TEST PASS] DUT_5: invalid write at ID 5 preserves all memory entries
+[INV_TEST PASS] DUT_5: invalid write at ID 31 preserves all memory entries
+[INV_TEST PASS] DUT_5: invalid decrement at ID 5 preserves all memory entries
+[INV_TEST PASS] DUT_5: invalid decrement at ID 31 preserves all memory entries
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 81 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 91 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 101 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 111 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 121 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 131 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 141 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 151 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 161 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 171 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 181 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 191 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 201 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 211 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 221 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 231 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 241 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 251 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 261 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 271 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 281 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 291 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 301 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 311 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 321 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 331 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: DUT_5: invalid ID x did not return safe zeros
+Time: 341 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+[INV_TEST PASS] DUT_5: sweep of invalid IDs 5..31 preserved all memory entries
+[INV_TEST PASS] DUT_5: valid update_price on ID 0 sets price=99
+[INV_TEST PASS] DUT_5: valid update_qty on ID 0 sets qty=15
+[INV_TEST PASS] DUT_5: valid purchase on ID 0 decrements qty to 14
+[INV_TEST PASS] DUT_5: valid update on ID 4 sets price=199
+[INV_TEST PASS] DUT_5: valid update on ID 4 sets qty=6
+[INV_TEST PASS] DUT_5: valid purchase on ID 4 decrements qty to 5
+[INV_TEST PASS] DUT_5: read ID 4 detects low_stock == 1
+[INV_TEST PASS] DUT_5: ID 4 qty reached 0
+[INV_TEST PASS] DUT_5: ID 4 stock_available == 0 when empty
+[INV_TEST PASS] DUT_5: ID 4 stock_ok == 0 when empty
+[INV_TEST PASS] DUT_5: ID 4 qty remains 0 on purchase attempt when empty
+[INV_TEST PASS] DUT_1: array size is 1
+[INV_TEST PASS] DUT_1: read ID 0 price == 10
+Error: [INV_TEST FAIL] DUT_1: read invalid ID 1 returns price 0
+Time: 458 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+Error: [INV_TEST FAIL] DUT_1: read invalid ID 31 returns price 0
+Time: 459 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+[INV_TEST PASS] DUT_4: array size is 4
+[INV_TEST PASS] DUT_4: read ID 3 price == 40
+Error: [INV_TEST FAIL] DUT_4: read invalid ID 4 returns price 0
+Time: 461 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+[INV_TEST PASS] DUT_8: array size is 8
+[INV_TEST PASS] DUT_8: read ID 7 price == 80
+Error: [INV_TEST FAIL] DUT_8: read invalid ID 8 returns price 0
+Time: 463 ns  Iteration: 0  Process: /tb_inventory_manager/check_condition  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+[INV_TEST PASS] DUT_32: array size is 32
+[INV_TEST PASS] DUT_32: read ID 31 price == 320
+[INV_TEST PASS] DUT_32: read ID 31 qty == 20
+================================================================
+   INVENTORY MANAGER TESTBENCH SUMMARY
+================================================================
+Total Checks : 65
+Passed Checks: 51
+Failed Checks: 14
+TB Errors    : 41
+================================================================
+SVM_TB_RESULT: FAIL total=65 passed=51 failed=14 tb_errors=41
+Fatal: tb_inventory_manager reported failures
+Time: 464 ns  Iteration: 0  Process: /tb_inventory_manager/Initial218_12  File: C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv
+$finish called at time : 464 ns : File "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/scratch/mutation_test/tb/tb_inventory_manager.sv" Line 528
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 19 00:34:12 2026...

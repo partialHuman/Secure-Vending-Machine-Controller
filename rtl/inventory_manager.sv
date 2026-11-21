@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
 
 module inventory_manager #(
-    parameter PRODUCTS    = 32,
-    parameter PRICE_WIDTH = 16,
-    parameter QTY_WIDTH   = 8
+    parameter int PRODUCT_COUNT = transaction_pkg::PRODUCT_COUNT_DEFAULT,
+    parameter int PRICE_WIDTH   = 16,
+    parameter int QTY_WIDTH     = 8
 )
 (
     input logic clk,
@@ -13,7 +13,7 @@ module inventory_manager #(
     // Product Selection
     //-------------------------------------------------
 
-    input logic [4:0] product_id,
+    input logic [transaction_pkg::PRODUCT_ID_WIDTH-1:0] product_id,
 
     //-------------------------------------------------
     // Control Signals
@@ -44,14 +44,22 @@ module inventory_manager #(
     output logic low_stock
 );
 
+import transaction_pkg::*;
+
+localparam int unsigned PC_SAFE = (PRODUCT_COUNT < 1) ? 1 :
+                                  (PRODUCT_COUNT > transaction_pkg::PRODUCT_COUNT_MAX) ? transaction_pkg::PRODUCT_COUNT_MAX :
+                                  PRODUCT_COUNT;
+
 //=====================================================
 // Memory
 //=====================================================
 
-logic [PRICE_WIDTH-1:0] price_mem [0:PRODUCTS-1];
-logic [QTY_WIDTH-1:0]   qty_mem   [0:PRODUCTS-1];
+logic [PRICE_WIDTH-1:0] price_mem [0:PC_SAFE-1];
+logic [QTY_WIDTH-1:0]   qty_mem   [0:PC_SAFE-1];
 
 integer i;
+
+wire id_valid = (product_id < PC_SAFE);
 
 //=====================================================
 // Inventory Update
@@ -63,7 +71,7 @@ begin
     if(rst)
     begin
 
-        for(i=0;i<PRODUCTS;i=i+1)
+        for(i=0; i<PC_SAFE; i=i+1)
         begin
             price_mem[i] <= (i+1)*10;
             qty_mem[i]   <= 20;
@@ -71,7 +79,7 @@ begin
 
     end
 
-    else
+    else if(id_valid)
     begin
 
         //--------------------------------------------
@@ -121,7 +129,7 @@ begin
     // Read Product
     //--------------------------------------------
 
-    if(read_en)
+    if(read_en && id_valid)
     begin
 
         product_price = price_mem[product_id];

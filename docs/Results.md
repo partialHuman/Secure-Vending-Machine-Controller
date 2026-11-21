@@ -1,5 +1,7 @@
 # Verification Results — v1.0.1 Post-Audit Hardening
 
+> **Historical Configuration Banner:** This document reflects the historical v1.0.1 verification baseline (`PRODUCTS = 32`); for v1.0.3 parameter architecture and verification, see the v1.0.3 documentation and testbenches.
+
 ## Overview
 
 The Secure Vending Machine Controller has undergone comprehensive hardening and verification following a hardware security audit. The complete SystemVerilog verification suite was executed using the installed **Vivado 2018.2 XSIM** simulator.

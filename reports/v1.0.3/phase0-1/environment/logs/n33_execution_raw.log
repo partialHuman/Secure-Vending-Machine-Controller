@@ -1,0 +1,53 @@
+
+================================================================================
+Secure Vending Machine Controller v1.0.3 - N=33 Probe Execution Log
+Timestamp: 2026-11-18 00:12:58 +05:30
+Toolchain: Xilinx Vivado 2018.2 / XSIM (SW Build 2258646)
+Host OS: Microsoft Windows 11 Pro 64-bit
+Working Directory: C:\Users\User\Documents\Projects\v1.0.3-phase0-1\probes\extra\sim_n33
+Source File: C:\Users\User\Documents\Projects\v1.0.3-phase0-1\probes\extra\probe_b_undefined_module_n33.sv
+================================================================================
+
+--- STEP 1: COMPILATION ---
+Command: xvlog -sv ..\probe_b_undefined_module_n33.sv
+Exit Code: 0
+Output:
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/extra/probe_b_undefined_module_n33.sv" into library work
+INFO: [VRFC 10-311] analyzing module probe_b_n33_core
+INFO: [VRFC 10-311] analyzing module probe_b_bad_33
+INFO: [VRFC 10-311] analyzing module probe_b_ok_32
+
+--- STEP 2: MANDATORY NEGATIVE TEST (N=33) ---
+Command: xelab probe_b_bad_33 -s pb_bad_33
+Exit Code: 1
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_b_bad_33 -s pb_bad_33 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+ERROR: [VRFC 10-2063] Module <PRODUCT_COUNT_OUT_OF_RANGE_see_docs> not found while processing module instance <g_bad_count.u_invalid> [C:/Users/User/Documents/Projects/v1.0.3-phase0-1/probes/extra/probe_b_undefined_module_n33.sv:9]
+ERROR: [XSIM 43-3322] Static elaboration of top level Verilog design unit(s) in library work failed.
+Snapshot pb_bad_33 Created: False
+
+--- STEP 3: OPTIONAL VALID BOUNDARY CONTROL TEST (N=32) ---
+Command: xelab probe_b_ok_32 -s pb_ok_32
+Exit Code: 0
+Output:
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe probe_b_ok_32 -s pb_ok_32 
+Multi-threading is on. Using 10 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.probe_b_n33_core(N=32)
+Compiling module work.probe_b_ok_32
+Built simulation snapshot pb_ok_32
+Snapshot pb_ok_32 Created: True
+
+================================================================================
+N=33 Probe Execution Complete.
+================================================================================

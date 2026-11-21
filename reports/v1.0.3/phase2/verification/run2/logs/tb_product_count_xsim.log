@@ -1,0 +1,159 @@
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_product_count_snap/xsim_script.tcl
+# xsim {tb_product_count_snap} -testplusarg REPORT_DIR=C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/build/reports/tb_product_count -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+================================================================
+   PRODUCT_COUNT SYSTEM TESTBENCH (CONFIGS: 1, 4, 5, 8, 32)
+================================================================
+[PC_TEST PASS] CFG_1: parameter propagated to top
+[PC_TEST PASS] CFG_1: parameter propagated to sec
+[PC_TEST PASS] CFG_1: parameter propagated to inv
+[PC_TEST PASS] CFG_1: inventory qty_mem depth is 1
+[PC_TEST PASS] CFG_1: inventory price_mem depth is 1
+[PC_TEST PASS] CFG_1: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_1: Valid ID 0: response received
+[PC_TEST PASS] CFG_1: Valid ID 0: status matches
+[PC_TEST PASS] CFG_1: Valid ID 0: error matches
+[PC_TEST PASS] CFG_1: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_1: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: handshake accepted
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: response received
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: status matches
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: error matches
+[PC_TEST PASS] CFG_1: Invalid boundary ID 1: dispense matches
+[PC_TEST PASS] CFG_1: ID 0 qty unchanged after invalid ID 1
+[PC_TEST PASS] CFG_1: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_1: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_1: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_1: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_1: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_1: ID 0 qty unchanged after invalid ID 31
+[PC_TEST PASS] CFG_4: parameter propagated to top
+[PC_TEST PASS] CFG_4: parameter propagated to sec
+[PC_TEST PASS] CFG_4: parameter propagated to inv
+[PC_TEST PASS] CFG_4: inventory qty_mem depth is 4
+[PC_TEST PASS] CFG_4: inventory price_mem depth is 4
+[PC_TEST PASS] CFG_4: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_4: Valid ID 0: response received
+[PC_TEST PASS] CFG_4: Valid ID 0: status matches
+[PC_TEST PASS] CFG_4: Valid ID 0: error matches
+[PC_TEST PASS] CFG_4: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_4: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_4: Valid ID 3: handshake accepted
+[PC_TEST PASS] CFG_4: Valid ID 3: response received
+[PC_TEST PASS] CFG_4: Valid ID 3: status matches
+[PC_TEST PASS] CFG_4: Valid ID 3: error matches
+[PC_TEST PASS] CFG_4: Valid ID 3: dispense matches
+[PC_TEST PASS] CFG_4: ID 3 qty decremented to 19
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: handshake accepted
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: response received
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: status matches
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: error matches
+[PC_TEST PASS] CFG_4: Invalid boundary ID 4: dispense matches
+[PC_TEST PASS] CFG_4: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_4: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_4: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_4: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_4: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_5: parameter propagated to top
+[PC_TEST PASS] CFG_5: parameter propagated to sec
+[PC_TEST PASS] CFG_5: parameter propagated to inv
+[PC_TEST PASS] CFG_5: inventory qty_mem depth is 5
+[PC_TEST PASS] CFG_5: inventory price_mem depth is 5
+[PC_TEST PASS] CFG_5: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_5: Valid ID 0: response received
+[PC_TEST PASS] CFG_5: Valid ID 0: status matches
+[PC_TEST PASS] CFG_5: Valid ID 0: error matches
+[PC_TEST PASS] CFG_5: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_5: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_5: Valid ID 4: handshake accepted
+[PC_TEST PASS] CFG_5: Valid ID 4: response received
+[PC_TEST PASS] CFG_5: Valid ID 4: status matches
+[PC_TEST PASS] CFG_5: Valid ID 4: error matches
+[PC_TEST PASS] CFG_5: Valid ID 4: dispense matches
+[PC_TEST PASS] CFG_5: ID 4 qty decremented to 19
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: handshake accepted
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: response received
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: status matches
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: error matches
+[PC_TEST PASS] CFG_5: Invalid boundary ID 5: dispense matches
+[PC_TEST PASS] CFG_5: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_5: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_5: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_5: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_5: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_8: parameter propagated to top
+[PC_TEST PASS] CFG_8: parameter propagated to sec
+[PC_TEST PASS] CFG_8: parameter propagated to inv
+[PC_TEST PASS] CFG_8: inventory qty_mem depth is 8
+[PC_TEST PASS] CFG_8: inventory price_mem depth is 8
+[PC_TEST PASS] CFG_8: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_8: Valid ID 0: response received
+[PC_TEST PASS] CFG_8: Valid ID 0: status matches
+[PC_TEST PASS] CFG_8: Valid ID 0: error matches
+[PC_TEST PASS] CFG_8: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_8: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_8: Valid ID 5 (exceeds default count 5): handshake accepted
+[PC_TEST PASS] CFG_8: Valid ID 5 (exceeds default count 5): response received
+[PC_TEST PASS] CFG_8: Valid ID 5 (exceeds default count 5): status matches
+[PC_TEST PASS] CFG_8: Valid ID 5 (exceeds default count 5): error matches
+[PC_TEST PASS] CFG_8: Valid ID 5 (exceeds default count 5): dispense matches
+[PC_TEST PASS] CFG_8: ID 5 qty decremented to 19
+[PC_TEST PASS] CFG_8: Valid last ID 7: handshake accepted
+[PC_TEST PASS] CFG_8: Valid last ID 7: response received
+[PC_TEST PASS] CFG_8: Valid last ID 7: status matches
+[PC_TEST PASS] CFG_8: Valid last ID 7: error matches
+[PC_TEST PASS] CFG_8: Valid last ID 7: dispense matches
+[PC_TEST PASS] CFG_8: ID 7 qty decremented to 19
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: handshake accepted
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: response received
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: status matches
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: error matches
+[PC_TEST PASS] CFG_8: Invalid boundary ID 8: dispense matches
+[PC_TEST PASS] CFG_8: Invalid max ID 31: handshake accepted
+[PC_TEST PASS] CFG_8: Invalid max ID 31: response received
+[PC_TEST PASS] CFG_8: Invalid max ID 31: status matches
+[PC_TEST PASS] CFG_8: Invalid max ID 31: error matches
+[PC_TEST PASS] CFG_8: Invalid max ID 31: dispense matches
+[PC_TEST PASS] CFG_32: parameter propagated to top
+[PC_TEST PASS] CFG_32: parameter propagated to sec
+[PC_TEST PASS] CFG_32: parameter propagated to inv
+[PC_TEST PASS] CFG_32: inventory qty_mem depth is 32
+[PC_TEST PASS] CFG_32: inventory price_mem depth is 32
+[PC_TEST PASS] CFG_32: Valid ID 0: handshake accepted
+[PC_TEST PASS] CFG_32: Valid ID 0: response received
+[PC_TEST PASS] CFG_32: Valid ID 0: status matches
+[PC_TEST PASS] CFG_32: Valid ID 0: error matches
+[PC_TEST PASS] CFG_32: Valid ID 0: dispense matches
+[PC_TEST PASS] CFG_32: ID 0 qty decremented to 19
+[PC_TEST PASS] CFG_32: Valid ID 15: handshake accepted
+[PC_TEST PASS] CFG_32: Valid ID 15: response received
+[PC_TEST PASS] CFG_32: Valid ID 15: status matches
+[PC_TEST PASS] CFG_32: Valid ID 15: error matches
+[PC_TEST PASS] CFG_32: Valid ID 15: dispense matches
+[PC_TEST PASS] CFG_32: ID 15 qty decremented to 19
+[PC_TEST PASS] CFG_32: Valid last ID 31: handshake accepted
+[PC_TEST PASS] CFG_32: Valid last ID 31: response received
+[PC_TEST PASS] CFG_32: Valid last ID 31: status matches
+[PC_TEST PASS] CFG_32: Valid last ID 31: error matches
+[PC_TEST PASS] CFG_32: Valid last ID 31: dispense matches
+[PC_TEST PASS] CFG_32: ID 31 qty decremented to 19
+================================================================
+   PRODUCT_COUNT TESTBENCH SUMMARY
+================================================================
+Total Checks : 133
+Passed Checks: 133
+Failed Checks: 0
+TB Errors    : 0
+================================================================
+SVM_TB_RESULT: PASS total=133 passed=133 failed=0 tb_errors=0
+$finish called at time : 2455 ns : File "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/tb/tb_product_count.sv" Line 515
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 19 00:23:24 2026...

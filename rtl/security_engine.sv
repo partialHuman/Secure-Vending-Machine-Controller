@@ -1,6 +1,9 @@
 `timescale 1ns/1ps
 
 module security_engine
+#(
+    parameter int PRODUCT_COUNT = transaction_pkg::PRODUCT_COUNT_DEFAULT
+)
 (
     input  logic clk,
     input  logic rst,
@@ -23,14 +26,15 @@ module security_engine
 
 import transaction_pkg::*;
 
+localparam int unsigned PC_SAFE = (PRODUCT_COUNT < 1) ? 1 :
+                                  (PRODUCT_COUNT > transaction_pkg::PRODUCT_COUNT_MAX) ? transaction_pkg::PRODUCT_COUNT_MAX :
+                                  PRODUCT_COUNT;
+
 //----------------------------------------------------
 // Internal Registers
 //----------------------------------------------------
 
 logic [15:0] last_transaction_id;
-
-logic security_ok_reg;
-error_t security_error_reg;
 
 //----------------------------------------------------
 // CRC Verification
@@ -127,7 +131,7 @@ begin
             // Invalid Product
             //------------------------------------------------
 
-            else if(packet.product_id >= PRODUCT_COUNT)
+            else if(packet.product_id >= PC_SAFE)
             begin
 
                 security_ok    <= 1'b0;

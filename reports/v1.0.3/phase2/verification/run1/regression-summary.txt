@@ -1,0 +1,11 @@
+================ REGRESSION SUMMARY ================
+tb_mixed_payment       PASS  SVM_TB_RESULT: PASS total=73 passed=73 failed=0 tb_errors=0 | known limitations observed: KL-002
+tb_coin_only           PASS  SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0 | known limitations observed: KL-002
+tb_card_only           PASS  SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0 | known limitations observed: KL-002
+tb_handshake_security  PASS  SVM_TB_RESULT: PASS total=220 passed=220 failed=0 tb_errors=0 | known limitations observed: KL-001, KL-004
+tb_inventory_manager   PASS  SVM_TB_RESULT: PASS total=65 passed=65 failed=0 tb_errors=0
+tb_product_count       PASS  SVM_TB_RESULT: PASS total=133 passed=133 failed=0 tb_errors=0
+tb_product_count_invalid_0 PASS  elaboration rejected as expected (exit 1, VRFC 10-2063)
+tb_product_count_invalid_33 PASS  elaboration rejected as expected (exit 1, VRFC 10-2063)
+====================================================
+RESULT: PASS

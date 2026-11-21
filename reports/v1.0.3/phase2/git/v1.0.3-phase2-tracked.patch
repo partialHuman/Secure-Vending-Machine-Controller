@@ -1,0 +1,537 @@
+diff --git a/docs/Results.md b/docs/Results.md
+index ef5c128..7dc26d8 100644
+--- a/docs/Results.md
++++ b/docs/Results.md
+@@ -1,5 +1,7 @@
+ # Verification Results — v1.0.1 Post-Audit Hardening
+ 
++> **Historical Configuration Banner:** This document reflects the historical v1.0.1 verification baseline (`PRODUCTS = 32`); for v1.0.3 parameter architecture and verification, see the v1.0.3 documentation and testbenches.
++
+ ## Overview
+ 
+ The Secure Vending Machine Controller has undergone comprehensive hardening and verification following a hardware security audit. The complete SystemVerilog verification suite was executed using the installed **Vivado 2018.2 XSIM** simulator.
+diff --git a/docs/Verification_Methodology.md b/docs/Verification_Methodology.md
+index c0d44cd..ce9ee32 100644
+--- a/docs/Verification_Methodology.md
++++ b/docs/Verification_Methodology.md
+@@ -1,5 +1,7 @@
+ # Verification Methodology — v1.0.1 Post-Audit Hardening
+ 
++> **Historical Configuration Banner:** This document reflects the historical v1.0.1 verification baseline (`PRODUCTS = 32`); for v1.0.3 parameter architecture and verification, see the v1.0.3 documentation and testbenches.
++
+ ## Overview
+ 
+ The Secure Vending Machine Controller was verified using an upgraded **SystemVerilog directed self-checking verification environment**. Following a hardware security audit, the verification strategy was significantly hardened to validate the **Option A Valid/Ready Handshake Protocol**, ensure robust **response-to-request transaction tracking**, verify **pipeline immunity under in-flight contention**, and detect edge-case security vulnerabilities.
+diff --git a/docs/known-limitations.md b/docs/known-limitations.md
+index 15cd9d5..f8d5531 100644
+--- a/docs/known-limitations.md
++++ b/docs/known-limitations.md
+@@ -13,7 +13,7 @@ Applies to v1.0.0 - v1.0.2 unless stated. **Defect** = behavior the maintainers
+ | KL-007 | Duplicate detection is weak and unreachable from the port | By design | v1.0.0 | Only the immediately preceding transaction ID is compared, IDs are assigned inside the design, and reset restarts them at 1. There is no replay protection and `ERR_DUPLICATE` cannot be produced through the request port. | - | Out of scope |
+ | KL-008 | Held-high `request_valid` repeats the purchase | By design (valid/ready) | v1.0.1 | The request has no ID. If `request_valid` stays high after acceptance, the same request is accepted again when `request_ready` returns. | Deassert `request_valid` after the accepting edge | Optional |
+ | KL-009 | Verification is directed simulation only | By design | v1.0.0 | No formal proof, no random testing, no assertions bound to the DUT. CRC, duplicate and timeout tests use `force` on internal signals because the conditions cannot be reached through the ports. The coin and card testbenches are near-duplicates, so their check counts overstate distinct coverage. | - | v1.1.0 (VER-002, VER-004, SEC-002) |
+-| KL-010 | No implementation evidence | By design | v1.0.0 | No synthesis, constraints, timing, utilization or hardware result exists. `rtl/top.sv` contains a hierarchical reference (`debug_state`) that may not synthesize in Vivado (unverified). The `debug_*` outputs expose internal balance/price/packet at the top boundary. | - | v1.2.0 (IMP-001) |
++| KL-010 | No implementation evidence | By design | v1.0.0 | No synthesis, constraints, timing, utilization or hardware result exists. The hierarchical reference (`debug_state`) was removed in v1.0.3 (D-109). The remaining `debug_*` outputs expose internal balance/price/packet at the top boundary. | - | v1.2.0 (IMP-001) |
+ 
+ ## What this project does **not** claim
+ 
+diff --git a/rtl/inventory_manager.sv b/rtl/inventory_manager.sv
+index 812bcc0..b1f6e0f 100644
+--- a/rtl/inventory_manager.sv
++++ b/rtl/inventory_manager.sv
+@@ -1,9 +1,9 @@
+ `timescale 1ns/1ps
+ 
+ module inventory_manager #(
+-    parameter PRODUCTS    = 32,
+-    parameter PRICE_WIDTH = 16,
+-    parameter QTY_WIDTH   = 8
++    parameter int PRODUCT_COUNT = transaction_pkg::PRODUCT_COUNT_DEFAULT,
++    parameter int PRICE_WIDTH   = 16,
++    parameter int QTY_WIDTH     = 8
+ )
+ (
+     input logic clk,
+@@ -13,7 +13,7 @@ module inventory_manager #(
+     // Product Selection
+     //-------------------------------------------------
+ 
+-    input logic [4:0] product_id,
++    input logic [transaction_pkg::PRODUCT_ID_WIDTH-1:0] product_id,
+ 
+     //-------------------------------------------------
+     // Control Signals
+@@ -44,15 +44,23 @@ module inventory_manager #(
+     output logic low_stock
+ );
+ 
++import transaction_pkg::*;
++
++localparam int unsigned PC_SAFE = (PRODUCT_COUNT < 1) ? 1 :
++                                  (PRODUCT_COUNT > transaction_pkg::PRODUCT_COUNT_MAX) ? transaction_pkg::PRODUCT_COUNT_MAX :
++                                  PRODUCT_COUNT;
++
+ //=====================================================
+ // Memory
+ //=====================================================
+ 
+-logic [PRICE_WIDTH-1:0] price_mem [0:PRODUCTS-1];
+-logic [QTY_WIDTH-1:0]   qty_mem   [0:PRODUCTS-1];
++logic [PRICE_WIDTH-1:0] price_mem [0:PC_SAFE-1];
++logic [QTY_WIDTH-1:0]   qty_mem   [0:PC_SAFE-1];
+ 
+ integer i;
+ 
++wire id_valid = (product_id < PC_SAFE);
++
+ //=====================================================
+ // Inventory Update
+ //=====================================================
+@@ -63,7 +71,7 @@ begin
+     if(rst)
+     begin
+ 
+-        for(i=0;i<PRODUCTS;i=i+1)
++        for(i=0; i<PC_SAFE; i=i+1)
+         begin
+             price_mem[i] <= (i+1)*10;
+             qty_mem[i]   <= 20;
+@@ -71,7 +79,7 @@ begin
+ 
+     end
+ 
+-    else
++    else if(id_valid)
+     begin
+ 
+         //--------------------------------------------
+@@ -121,7 +129,7 @@ begin
+     // Read Product
+     //--------------------------------------------
+ 
+-    if(read_en)
++    if(read_en && id_valid)
+     begin
+ 
+         product_price = price_mem[product_id];
+@@ -137,4 +145,4 @@ begin
+ 
+ end
+ 
+-endmodule
+\ No newline at end of file
++endmodule
+diff --git a/rtl/payment_interface.sv b/rtl/payment_interface.sv
+index 4d3a349..913434c 100644
+--- a/rtl/payment_interface.sv
++++ b/rtl/payment_interface.sv
+@@ -19,7 +19,7 @@ module payment_interface
+     // Handshake
+     //--------------------------------------------------
+ 
+-    input  logic arbiter_ready,
++    input  logic accept_ready,
+ 
+     //--------------------------------------------------
+     // Output Packet
+@@ -77,7 +77,7 @@ begin
+ 
+         //----------------------------------------------
+ 
+-        if(request_valid && arbiter_ready)
++        if(request_valid && accept_ready)
+         begin
+ 
+             packet.payment_type <= request.payment_type;
+diff --git a/rtl/security_engine.sv b/rtl/security_engine.sv
+index 34b9cb8..ce3db77 100644
+--- a/rtl/security_engine.sv
++++ b/rtl/security_engine.sv
+@@ -1,6 +1,9 @@
+ `timescale 1ns/1ps
+ 
+ module security_engine
++#(
++    parameter int PRODUCT_COUNT = transaction_pkg::PRODUCT_COUNT_DEFAULT
++)
+ (
+     input  logic clk,
+     input  logic rst,
+@@ -23,15 +26,16 @@ module security_engine
+ 
+ import transaction_pkg::*;
+ 
++localparam int unsigned PC_SAFE = (PRODUCT_COUNT < 1) ? 1 :
++                                  (PRODUCT_COUNT > transaction_pkg::PRODUCT_COUNT_MAX) ? transaction_pkg::PRODUCT_COUNT_MAX :
++                                  PRODUCT_COUNT;
++
+ //----------------------------------------------------
+ // Internal Registers
+ //----------------------------------------------------
+ 
+ logic [15:0] last_transaction_id;
+ 
+-logic security_ok_reg;
+-error_t security_error_reg;
+-
+ //----------------------------------------------------
+ // CRC Verification
+ //----------------------------------------------------
+@@ -127,7 +131,7 @@ begin
+             // Invalid Product
+             //------------------------------------------------
+ 
+-            else if(packet.product_id >= PRODUCT_COUNT)
++            else if(packet.product_id >= PC_SAFE)
+             begin
+ 
+                 security_ok    <= 1'b0;
+diff --git a/rtl/top.sv b/rtl/top.sv
+index 23d0faf..8d954b3 100644
+--- a/rtl/top.sv
++++ b/rtl/top.sv
+@@ -1,6 +1,9 @@
+ `timescale 1ns/1ps
+ 
+ module top
++#(
++    parameter int PRODUCT_COUNT = transaction_pkg::PRODUCT_COUNT_DEFAULT
++)
+ (
+     input logic clk,
+     input logic rst,
+@@ -35,6 +38,18 @@ module top
+ 
+ import transaction_pkg::*;
+ 
++//==================================================
++// D-102 Parameter Validation Guard
++//==================================================
++generate
++    if (PRODUCT_COUNT < 1 ||
++        PRODUCT_COUNT > transaction_pkg::PRODUCT_COUNT_MAX) begin : g_bad_count
++
++        PRODUCT_COUNT_OUT_OF_RANGE_see_docs u_invalid ();
++
++    end
++endgenerate
++
+ //==================================================
+ // Internal Signals
+ //==================================================
+@@ -44,7 +59,6 @@ logic packet_valid;
+ transaction_packet_t packet;
+ 
+ // Arbiter
+-logic arbiter_ready;
+ logic out_valid;
+ transaction_packet_t out_packet;
+ 
+@@ -88,7 +102,6 @@ logic complete;
+ 
+ status_t status;
+ error_t error_code;
+-state_t debug_state;
+ // Resource Managers
+ logic balance_ok;
+ logic stock_ok;
+@@ -119,7 +132,7 @@ payment_interface u_payment_interface
+     .request(request),
+     .request_valid(request_valid),
+ 
+-    .arbiter_ready(request_ready),
++    .accept_ready(request_ready),
+ 
+     .packet(packet),
+     .packet_valid(packet_valid)
+@@ -137,7 +150,7 @@ payment_arbiter u_payment_arbiter
+     .packet_valid(packet_valid),
+     .packet(packet),
+ 
+-    .arbiter_ready(arbiter_ready),
++    .arbiter_ready(),
+ 
+     .out_packet(out_packet),
+     .out_valid(out_valid),
+@@ -149,7 +162,9 @@ payment_arbiter u_payment_arbiter
+ // Security Engine
+ //==================================================
+ 
+-security_engine u_security_engine
++security_engine #(
++    .PRODUCT_COUNT(PRODUCT_COUNT)
++) u_security_engine
+ (
+     .clk(clk),
+     .rst(rst),
+@@ -210,7 +225,9 @@ balance_manager u_balance_manager
+ // Inventory Manager
+ //--------------------------------------------------
+ 
+-inventory_manager u_inventory_manager
++inventory_manager #(
++    .PRODUCT_COUNT(PRODUCT_COUNT)
++) u_inventory_manager
+ (
+     .clk(clk),
+     .rst(rst),
+@@ -252,7 +269,7 @@ transaction_controller u_transaction_controller
+     .balance_ok(balance_ok),
+     .stock_ok(stock_ok),
+ 
+-    .arbiter_ready(controller_ready),
++    .idle(controller_ready),
+     .busy(busy),
+ 
+     .dispense(dispense),
+@@ -305,7 +322,6 @@ assign update_qty   = 1'b0;
+ //--------------------------------------------------
+ 
+ assign debug_packet      = secure_packet;
+-assign debug_state       = u_transaction_controller.current_state;
+ assign debug_balance     = current_balance;
+ assign debug_refund      = refund_amount;
+ assign debug_price       = product_price;
+diff --git a/rtl/transaction_controller.sv b/rtl/transaction_controller.sv
+index c3a8c60..b20b901 100644
+--- a/rtl/transaction_controller.sv
++++ b/rtl/transaction_controller.sv
+@@ -27,7 +27,7 @@ module transaction_controller
+     //--------------------------------------------------
+     // Outputs
+     //--------------------------------------------------
+-    output logic arbiter_ready,
++    output logic idle,
+ 
+     // High for the whole transaction (RECEIVE_PAYMENT
+     // through COMPLETE). Drives balance_manager/
+@@ -389,9 +389,9 @@ assign error_code = error_reg;
+ assign busy = (current_state != IDLE);
+ 
+ //-----------------------------------------------------
+-// Arbiter Ready
++// Idle
+ //-----------------------------------------------------
+ 
+-assign arbiter_ready = (current_state == IDLE);
++assign idle = (current_state == IDLE);
+ 
+ endmodule
+\ No newline at end of file
+diff --git a/rtl/transaction_pkg.sv b/rtl/transaction_pkg.sv
+index bf57fe2..ebb9ae9 100644
+--- a/rtl/transaction_pkg.sv
++++ b/rtl/transaction_pkg.sv
+@@ -14,7 +14,8 @@ package transaction_pkg;
+     parameter int ERROR_WIDTH        = 8;
+     parameter int TRANSACTION_WIDTH  = 16;
+ 
+-    parameter int PRODUCT_COUNT      = 5;
++    parameter int PRODUCT_COUNT_DEFAULT = 5;
++    parameter int PRODUCT_COUNT_MAX     = 2**PRODUCT_ID_WIDTH; // 32
+     parameter int INVENTORY_WIDTH    = 8;
+     parameter int PRICE_WIDTH        = 16;
+     parameter int CRC_WIDTH          = 8;
+diff --git a/scripts/expected_checks.txt b/scripts/expected_checks.txt
+index ca01384..4b13767 100644
+--- a/scripts/expected_checks.txt
++++ b/scripts/expected_checks.txt
+@@ -1,7 +1,9 @@
+ # Expected check counts per testbench (the 'total=' value of SVM_TB_RESULT).
+-# Format: <testbench_name> <expected_count>
+-# Verified in Vivado 2018.2 XSIM for release v1.0.2.
++# Regenerate with:  SVM_UPDATE_MANIFEST=1 vivado -mode batch -source scripts/run_regression.tcl
++# Review the diff before committing: a changed count means tests were added or removed.
+ tb_card_only 102
+ tb_coin_only 102
+ tb_handshake_security 220
++tb_inventory_manager 65
+ tb_mixed_payment 73
++tb_product_count 133
+diff --git a/scripts/run_regression.tcl b/scripts/run_regression.tcl
+index 19fbca9..b5463ce 100644
+--- a/scripts/run_regression.tcl
++++ b/scripts/run_regression.tcl
+@@ -1,5 +1,5 @@
+ # ============================================================================
+-# One-command regression for Secure-Vending-Machine-Controller   (v1.0.2)
++# One-command regression for Secure-Vending-Machine-Controller   (v1.0.3)
+ #
+ #   vivado -mode batch -source scripts/run_regression.tcl
+ #   (or:   tclsh scripts/run_regression.tcl      with the Vivado bin dir on PATH)
+@@ -37,7 +37,7 @@ set rtl_files {
+     security_engine.sv timeout_controller.sv balance_manager.sv
+     inventory_manager.sv transaction_controller.sv response_generator.sv top.sv
+ }
+-set valid_tbs {tb_mixed_payment tb_coin_only tb_card_only tb_handshake_security}
++set valid_tbs {tb_mixed_payment tb_coin_only tb_card_only tb_handshake_security tb_inventory_manager tb_product_count}
+ if {[info exists ::env(SVM_TBS)]} {
+     set tbs $::env(SVM_TBS)
+ } else {
+@@ -270,6 +270,41 @@ foreach tb $tbs {
+     if {$status ne "PASS"} { lappend failed $tb }
+ }
+ 
++# ---- 2b. negative elaboration tests (D-102 verification) -------------------
++set run_neg 0
++if {![info exists ::env(SVM_TBS)] || [lsearch -exact $::env(SVM_TBS) "tb_product_count"] >= 0} {
++    set run_neg 1
++}
++if {$run_neg} {
++    set neg_sv [file join $root tb tb_product_count_invalid.sv]
++    if {[file exists $neg_sv]} {
++        if {[run_step tb_product_count_invalid_xvlog [list xvlog -sv $neg_sv]] == 0} {
++            foreach ntb {tb_product_count_invalid_0 tb_product_count_invalid_33} {
++                set n_rc [run_step ${ntb}_xelab [list xelab $ntb -debug typical -s ${ntb}_snap]]
++                set n_log [file join $logdir "${ntb}_xelab.log"]
++                set n_has_err 0
++                if {[file exists $n_log]} {
++                    set nfh [open $n_log r]
++                    set n_txt [read $nfh]
++                    close $nfh
++                    if {[string match "*VRFC 10-2063*" $n_txt] && [string match "*PRODUCT_COUNT_OUT_OF_RANGE*" $n_txt]} {
++                        set n_has_err 1
++                    }
++                }
++                if {$n_rc == 1 && $n_has_err} {
++                    lappend summary [format "%-22s %-5s %s" $ntb "PASS" "elaboration rejected as expected (exit 1, VRFC 10-2063)"]
++                } else {
++                    lappend summary [format "%-22s %-5s %s" $ntb "FAIL" "expected elaboration rejection (rc=$n_rc, has_err=$n_has_err)"]
++                    lappend failed $ntb
++                }
++            }
++        } else {
++            lappend summary [format "%-22s %-5s %s" "tb_product_count_invalid" "FAIL" "xvlog failed for negative testbench"]
++            lappend failed "tb_product_count_invalid"
++        }
++    }
++}
++
+ # ---- 3. summary ---------------------------------------------------------------
+ set out "================ REGRESSION SUMMARY ================\n"
+ foreach l $summary { append out "$l\n" }
+@@ -284,18 +319,33 @@ set sf [open [file join $build regression-summary.txt] w]
+ puts -nonewline $sf $out
+ close $sf
+ 
+-# ---- 4. optionally record observed counts -----------------------------------
+-if {[info exists ::env(SVM_UPDATE_MANIFEST)]} {
++# ---- 4. optionally record observed counts (merge-only) ----------------------
++if {[info exists ::env(SVM_UPDATE_MANIFEST)] && $::env(SVM_UPDATE_MANIFEST) ne "0"} {
+     if {[llength $failed]} {
+         puts "NOTE: expected_checks.txt NOT updated because the run failed."
+     } else {
++        array set merged {}
++        if {[file exists $manifest_file]} {
++            set mfh [open $manifest_file r]
++            while {[gets $mfh mline] >= 0} {
++                set mline [string trim $mline]
++                if {$mline eq "" || [string index $mline 0] eq "#"} { continue }
++                if {[regexp {^([a-zA-Z0-9_]+)\s+([0-9]+)$} $mline -> mname mcnt]} {
++                    set merged($mname) $mcnt
++                }
++            }
++            close $mfh
++        }
++        foreach name [array names observed] {
++            set merged($name) $observed($name)
++        }
+         set mf [open $manifest_file w]
+         puts $mf "# Expected check counts per testbench (the 'total=' value of SVM_TB_RESULT)."
+         puts $mf "# Regenerate with:  SVM_UPDATE_MANIFEST=1 vivado -mode batch -source scripts/run_regression.tcl"
+         puts $mf "# Review the diff before committing: a changed count means tests were added or removed."
+-        foreach name [lsort [array names observed]] { puts $mf "$name $observed($name)" }
++        foreach name [lsort [array names merged]] { puts $mf "$name $merged($name)" }
+         close $mf
+-        puts "expected_checks.txt updated."
++        puts "expected_checks.txt updated (merged [array size merged] entries)."
+     }
+ }
+ 
+diff --git a/tb/tb_handshake_security.sv b/tb/tb_handshake_security.sv
+index 2d69660..be13637 100644
+--- a/tb/tb_handshake_security.sv
++++ b/tb/tb_handshake_security.sv
+@@ -155,7 +155,10 @@ module tb_handshake_security;
+                 active_txn.payment_type = payment;
+                 active_txn.amount       = amount;
+                 active_txn.product_id   = product;
+-                active_txn.inv_before   = dut.u_inventory_manager.qty_mem[product];
++                if (product < PRODUCT_COUNT_DEFAULT)
++                    active_txn.inv_before   = dut.u_inventory_manager.qty_mem[product];
++                else
++                    active_txn.inv_before   = 8'd0;
+                 active_txn.bal_before   = dut.u_balance_manager.current_balance;
+             end
+             else
+@@ -223,8 +226,18 @@ module tb_handshake_security;
+         response_packet_t rr;
+         bit got;
+         integer q_before;
++        logic [INVENTORY_WIDTH-1:0] snap_before [0:PRODUCT_COUNT_DEFAULT-1];
++        bit inv_ok;
++        integer k;
+     begin
+-        q_before = dut.u_inventory_manager.qty_mem[product];
++        for (k = 0; k < PRODUCT_COUNT_DEFAULT; k = k + 1)
++            snap_before[k] = dut.u_inventory_manager.qty_mem[k];
++
++        if (product < PRODUCT_COUNT_DEFAULT)
++            q_before = dut.u_inventory_manager.qty_mem[product];
++        else
++            q_before = 0;
++
+         send_request(payment, amount, product);
+         wait_response_sec(rr, got);
+         check_condition($sformatf("%s: status", desc),   rr.status   == exp_status);
+@@ -232,8 +245,17 @@ module tb_handshake_security;
+         check_condition($sformatf("%s: dispense", desc), rr.dispense == exp_dispense);
+         if (check_refund)
+             check_condition($sformatf("%s: refund", desc), rr.refund == exp_refund);
+-        check_condition($sformatf("%s: inventory change", desc),
+-            dut.u_inventory_manager.qty_mem[product] == (exp_dispense ? q_before - 1 : q_before));
++
++        if (product < PRODUCT_COUNT_DEFAULT) begin
++            inv_ok = (dut.u_inventory_manager.qty_mem[product] == (exp_dispense ? q_before - 1 : q_before));
++        end else begin
++            inv_ok = 1'b1;
++            for (k = 0; k < PRODUCT_COUNT_DEFAULT; k = k + 1) begin
++                if (dut.u_inventory_manager.qty_mem[k] != snap_before[k])
++                    inv_ok = 1'b0;
++            end
++        end
++        check_condition($sformatf("%s: inventory change", desc), inv_ok);
+     end
+     endtask
+ 
+diff --git a/tb/tb_mixed_payment.sv b/tb/tb_mixed_payment.sv
+index ff8f627..c813c37 100644
+--- a/tb/tb_mixed_payment.sv
++++ b/tb/tb_mixed_payment.sv
+@@ -1759,7 +1759,7 @@ always #5 clk = ~clk;
+         $display("| Product | Price | Quantity |");
+         $display("-----------------------------");
+ 
+-        for(i=0;i<PRODUCT_COUNT;i=i+1)
++        for(i=0;i<transaction_pkg::PRODUCT_COUNT_DEFAULT;i=i+1)
+         begin
+ 
+             $display("|   %0d     | %5d | %8d |", i, dut.u_inventory_manager.price_mem[i], dut.u_inventory_manager.qty_mem[i]);
+@@ -1768,7 +1768,7 @@ always #5 clk = ~clk;
+         // Inventory report CSV
+         $fwrite(inventory_csv,"Product ID,Price,Remaining Quantity\n");
+ 
+-        for(i=0;i<PRODUCT_COUNT;i=i+1)
++        for(i=0;i<transaction_pkg::PRODUCT_COUNT_DEFAULT;i=i+1)
+         begin
+             $fwrite(inventory_csv,"%0d,%0d,%0d\n", i, dut.u_inventory_manager.price_mem[i], dut.u_inventory_manager.qty_mem[i]);
+         end
+@@ -1780,7 +1780,7 @@ always #5 clk = ~clk;
+ 
+         $fwrite(html_file,"<tr><th>Product ID</th><th>Price</th><th>Remaining Quantity</th><th>Status</th></tr>\n");
+ 
+-        for(i=0; i<PRODUCT_COUNT; i=i+1)
++        for(i=0; i<transaction_pkg::PRODUCT_COUNT_DEFAULT; i=i+1)
+         begin
+             if(dut.u_inventory_manager.qty_mem[i] == 0)
+             begin

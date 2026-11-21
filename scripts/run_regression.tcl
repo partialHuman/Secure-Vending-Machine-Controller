@@ -1,5 +1,5 @@
 # ============================================================================
-# One-command regression for Secure-Vending-Machine-Controller   (v1.0.2)
+# One-command regression for Secure-Vending-Machine-Controller   (v1.0.3)
 #
 #   vivado -mode batch -source scripts/run_regression.tcl
 #   (or:   tclsh scripts/run_regression.tcl      with the Vivado bin dir on PATH)
@@ -37,7 +37,7 @@ set rtl_files {
     security_engine.sv timeout_controller.sv balance_manager.sv
     inventory_manager.sv transaction_controller.sv response_generator.sv top.sv
 }
-set valid_tbs {tb_mixed_payment tb_coin_only tb_card_only tb_handshake_security}
+set valid_tbs {tb_mixed_payment tb_coin_only tb_card_only tb_handshake_security tb_inventory_manager tb_product_count}
 if {[info exists ::env(SVM_TBS)]} {
     set tbs $::env(SVM_TBS)
 } else {
@@ -270,6 +270,41 @@ foreach tb $tbs {
     if {$status ne "PASS"} { lappend failed $tb }
 }
 
+# ---- 2b. negative elaboration tests (D-102 verification) -------------------
+set run_neg 0
+if {![info exists ::env(SVM_TBS)] || [lsearch -exact $::env(SVM_TBS) "tb_product_count"] >= 0} {
+    set run_neg 1
+}
+if {$run_neg} {
+    set neg_sv [file join $root tb tb_product_count_invalid.sv]
+    if {[file exists $neg_sv]} {
+        if {[run_step tb_product_count_invalid_xvlog [list xvlog -sv $neg_sv]] == 0} {
+            foreach ntb {tb_product_count_invalid_0 tb_product_count_invalid_33} {
+                set n_rc [run_step ${ntb}_xelab [list xelab $ntb -debug typical -s ${ntb}_snap]]
+                set n_log [file join $logdir "${ntb}_xelab.log"]
+                set n_has_err 0
+                if {[file exists $n_log]} {
+                    set nfh [open $n_log r]
+                    set n_txt [read $nfh]
+                    close $nfh
+                    if {[string match "*VRFC 10-2063*" $n_txt] && [string match "*PRODUCT_COUNT_OUT_OF_RANGE*" $n_txt]} {
+                        set n_has_err 1
+                    }
+                }
+                if {$n_rc == 1 && $n_has_err} {
+                    lappend summary [format "%-22s %-5s %s" $ntb "PASS" "elaboration rejected as expected (exit 1, VRFC 10-2063)"]
+                } else {
+                    lappend summary [format "%-22s %-5s %s" $ntb "FAIL" "expected elaboration rejection (rc=$n_rc, has_err=$n_has_err)"]
+                    lappend failed $ntb
+                }
+            }
+        } else {
+            lappend summary [format "%-22s %-5s %s" "tb_product_count_invalid" "FAIL" "xvlog failed for negative testbench"]
+            lappend failed "tb_product_count_invalid"
+        }
+    }
+}
+
 # ---- 3. summary ---------------------------------------------------------------
 set out "================ REGRESSION SUMMARY ================\n"
 foreach l $summary { append out "$l\n" }
@@ -284,18 +319,33 @@ set sf [open [file join $build regression-summary.txt] w]
 puts -nonewline $sf $out
 close $sf
 
-# ---- 4. optionally record observed counts -----------------------------------
-if {[info exists ::env(SVM_UPDATE_MANIFEST)]} {
+# ---- 4. optionally record observed counts (merge-only) ----------------------
+if {[info exists ::env(SVM_UPDATE_MANIFEST)] && $::env(SVM_UPDATE_MANIFEST) ne "0"} {
     if {[llength $failed]} {
         puts "NOTE: expected_checks.txt NOT updated because the run failed."
     } else {
+        array set merged {}
+        if {[file exists $manifest_file]} {
+            set mfh [open $manifest_file r]
+            while {[gets $mfh mline] >= 0} {
+                set mline [string trim $mline]
+                if {$mline eq "" || [string index $mline 0] eq "#"} { continue }
+                if {[regexp {^([a-zA-Z0-9_]+)\s+([0-9]+)$} $mline -> mname mcnt]} {
+                    set merged($mname) $mcnt
+                }
+            }
+            close $mfh
+        }
+        foreach name [array names observed] {
+            set merged($name) $observed($name)
+        }
         set mf [open $manifest_file w]
         puts $mf "# Expected check counts per testbench (the 'total=' value of SVM_TB_RESULT)."
         puts $mf "# Regenerate with:  SVM_UPDATE_MANIFEST=1 vivado -mode batch -source scripts/run_regression.tcl"
         puts $mf "# Review the diff before committing: a changed count means tests were added or removed."
-        foreach name [lsort [array names observed]] { puts $mf "$name $observed($name)" }
+        foreach name [lsort [array names merged]] { puts $mf "$name $merged($name)" }
         close $mf
-        puts "expected_checks.txt updated."
+        puts "expected_checks.txt updated (merged [array size merged] entries)."
     }
 }
 

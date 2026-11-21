@@ -1,0 +1,91 @@
+
+****** xsim v2018.2 (64-bit)
+  **** SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+  **** IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_inventory_manager_snap/xsim_script.tcl
+# xsim {tb_inventory_manager_snap} -testplusarg REPORT_DIR=C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/build/reports/tb_inventory_manager -autoloadwcfg -runall
+Vivado Simulator 2018.2
+Time resolution is 1 ps
+run -all
+================================================================
+   INVENTORY MANAGER DIRECT UNIT TESTBENCH (D-103, D-108)
+================================================================
+[INV_TEST PASS] DUT_5: array size qty_mem is 5
+[INV_TEST PASS] DUT_5: array size price_mem is 5
+[INV_TEST PASS] DUT_5: array bits qty_mem is 40
+[INV_TEST PASS] DUT_5: reset price_mem[0] == 10
+[INV_TEST PASS] DUT_5: reset qty_mem[0] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[1] == 20
+[INV_TEST PASS] DUT_5: reset qty_mem[1] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[2] == 30
+[INV_TEST PASS] DUT_5: reset qty_mem[2] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[3] == 40
+[INV_TEST PASS] DUT_5: reset qty_mem[3] == 20
+[INV_TEST PASS] DUT_5: reset price_mem[4] == 50
+[INV_TEST PASS] DUT_5: reset qty_mem[4] == 20
+[INV_TEST PASS] DUT_5: read ID 0 price == 10
+[INV_TEST PASS] DUT_5: read ID 0 quantity == 20
+[INV_TEST PASS] DUT_5: read ID 0 stock_available == 1
+[INV_TEST PASS] DUT_5: read ID 0 stock_ok == 1
+[INV_TEST PASS] DUT_5: read ID 0 low_stock == 0
+[INV_TEST PASS] DUT_5: read ID 4 price == 50
+[INV_TEST PASS] DUT_5: read ID 4 quantity == 20
+[INV_TEST PASS] DUT_5: read ID 4 stock_available == 1
+[INV_TEST PASS] DUT_5: read ID 4 stock_ok == 1
+[INV_TEST PASS] DUT_5: read ID 4 low_stock == 0
+[INV_TEST PASS] DUT_5: read_en=0 returns zero price
+[INV_TEST PASS] DUT_5: read_en=0 returns zero quantity
+[INV_TEST PASS] DUT_5: read_en=0 returns stock_ok=0
+[INV_TEST PASS] DUT_5: read invalid ID 5 returns price=0
+[INV_TEST PASS] DUT_5: read invalid ID 5 returns quantity=0
+[INV_TEST PASS] DUT_5: read invalid ID 5 returns stock_available=0
+[INV_TEST PASS] DUT_5: read invalid ID 5 returns stock_ok=0
+[INV_TEST PASS] DUT_5: read invalid ID 5 returns low_stock=0
+[INV_TEST PASS] DUT_5: read invalid ID 31 returns price=0
+[INV_TEST PASS] DUT_5: read invalid ID 31 returns quantity=0
+[INV_TEST PASS] DUT_5: read invalid ID 31 returns stock_available=0
+[INV_TEST PASS] DUT_5: read invalid ID 31 returns stock_ok=0
+[INV_TEST PASS] DUT_5: read invalid ID 31 returns low_stock=0
+[INV_TEST PASS] DUT_5: invalid write at ID 5 preserves all memory entries
+[INV_TEST PASS] DUT_5: invalid write at ID 31 preserves all memory entries
+[INV_TEST PASS] DUT_5: invalid decrement at ID 5 preserves all memory entries
+[INV_TEST PASS] DUT_5: invalid decrement at ID 31 preserves all memory entries
+[INV_TEST PASS] DUT_5: sweep of invalid IDs 5..31 preserved all memory entries
+[INV_TEST PASS] DUT_5: valid update_price on ID 0 sets price=99
+[INV_TEST PASS] DUT_5: valid update_qty on ID 0 sets qty=15
+[INV_TEST PASS] DUT_5: valid purchase on ID 0 decrements qty to 14
+[INV_TEST PASS] DUT_5: valid update on ID 4 sets price=199
+[INV_TEST PASS] DUT_5: valid update on ID 4 sets qty=6
+[INV_TEST PASS] DUT_5: valid purchase on ID 4 decrements qty to 5
+[INV_TEST PASS] DUT_5: read ID 4 detects low_stock == 1
+[INV_TEST PASS] DUT_5: ID 4 qty reached 0
+[INV_TEST PASS] DUT_5: ID 4 stock_available == 0 when empty
+[INV_TEST PASS] DUT_5: ID 4 stock_ok == 0 when empty
+[INV_TEST PASS] DUT_5: ID 4 qty remains 0 on purchase attempt when empty
+[INV_TEST PASS] DUT_1: array size is 1
+[INV_TEST PASS] DUT_1: read ID 0 price == 10
+[INV_TEST PASS] DUT_1: read invalid ID 1 returns price 0
+[INV_TEST PASS] DUT_1: read invalid ID 31 returns price 0
+[INV_TEST PASS] DUT_4: array size is 4
+[INV_TEST PASS] DUT_4: read ID 3 price == 40
+[INV_TEST PASS] DUT_4: read invalid ID 4 returns price 0
+[INV_TEST PASS] DUT_8: array size is 8
+[INV_TEST PASS] DUT_8: read ID 7 price == 80
+[INV_TEST PASS] DUT_8: read invalid ID 8 returns price 0
+[INV_TEST PASS] DUT_32: array size is 32
+[INV_TEST PASS] DUT_32: read ID 31 price == 320
+[INV_TEST PASS] DUT_32: read ID 31 qty == 20
+================================================================
+   INVENTORY MANAGER TESTBENCH SUMMARY
+================================================================
+Total Checks : 65
+Passed Checks: 65
+Failed Checks: 0
+TB Errors    : 0
+================================================================
+SVM_TB_RESULT: PASS total=65 passed=65 failed=0 tb_errors=0
+$finish called at time : 464 ns : File "C:/Users/User/Documents/Projects/Secure-Vending-Machine-Controller-v1.0.3-phase2/tb/tb_inventory_manager.sv" Line 532
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 19 00:23:20 2026...

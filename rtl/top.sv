@@ -1,6 +1,9 @@
 `timescale 1ns/1ps
 
 module top
+#(
+    parameter int PRODUCT_COUNT = transaction_pkg::PRODUCT_COUNT_DEFAULT
+)
 (
     input logic clk,
     input logic rst,
@@ -36,6 +39,18 @@ module top
 import transaction_pkg::*;
 
 //==================================================
+// D-102 Parameter Validation Guard
+//==================================================
+generate
+    if (PRODUCT_COUNT < 1 ||
+        PRODUCT_COUNT > transaction_pkg::PRODUCT_COUNT_MAX) begin : g_bad_count
+
+        PRODUCT_COUNT_OUT_OF_RANGE_see_docs u_invalid ();
+
+    end
+endgenerate
+
+//==================================================
 // Internal Signals
 //==================================================
 
@@ -44,7 +59,6 @@ logic packet_valid;
 transaction_packet_t packet;
 
 // Arbiter
-logic arbiter_ready;
 logic out_valid;
 transaction_packet_t out_packet;
 
@@ -88,7 +102,6 @@ logic complete;
 
 status_t status;
 error_t error_code;
-state_t debug_state;
 // Resource Managers
 logic balance_ok;
 logic stock_ok;
@@ -119,7 +132,7 @@ payment_interface u_payment_interface
     .request(request),
     .request_valid(request_valid),
 
-    .arbiter_ready(request_ready),
+    .accept_ready(request_ready),
 
     .packet(packet),
     .packet_valid(packet_valid)
@@ -137,7 +150,7 @@ payment_arbiter u_payment_arbiter
     .packet_valid(packet_valid),
     .packet(packet),
 
-    .arbiter_ready(arbiter_ready),
+    .arbiter_ready(),
 
     .out_packet(out_packet),
     .out_valid(out_valid),
@@ -149,7 +162,9 @@ payment_arbiter u_payment_arbiter
 // Security Engine
 //==================================================
 
-security_engine u_security_engine
+security_engine #(
+    .PRODUCT_COUNT(PRODUCT_COUNT)
+) u_security_engine
 (
     .clk(clk),
     .rst(rst),
@@ -210,7 +225,9 @@ balance_manager u_balance_manager
 // Inventory Manager
 //--------------------------------------------------
 
-inventory_manager u_inventory_manager
+inventory_manager #(
+    .PRODUCT_COUNT(PRODUCT_COUNT)
+) u_inventory_manager
 (
     .clk(clk),
     .rst(rst),
@@ -252,7 +269,7 @@ transaction_controller u_transaction_controller
     .balance_ok(balance_ok),
     .stock_ok(stock_ok),
 
-    .arbiter_ready(controller_ready),
+    .idle(controller_ready),
     .busy(busy),
 
     .dispense(dispense),
@@ -305,7 +322,6 @@ assign update_qty   = 1'b0;
 //--------------------------------------------------
 
 assign debug_packet      = secure_packet;
-assign debug_state       = u_transaction_controller.current_state;
 assign debug_balance     = current_balance;
 assign debug_refund      = refund_amount;
 assign debug_price       = product_price;

@@ -1759,7 +1759,7 @@ always #5 clk = ~clk;
         $display("| Product | Price | Quantity |");
         $display("-----------------------------");
 
-        for(i=0;i<PRODUCT_COUNT;i=i+1)
+        for(i=0;i<transaction_pkg::PRODUCT_COUNT_DEFAULT;i=i+1)
         begin
 
             $display("|   %0d     | %5d | %8d |", i, dut.u_inventory_manager.price_mem[i], dut.u_inventory_manager.qty_mem[i]);
@@ -1768,7 +1768,7 @@ always #5 clk = ~clk;
         // Inventory report CSV
         $fwrite(inventory_csv,"Product ID,Price,Remaining Quantity\n");
 
-        for(i=0;i<PRODUCT_COUNT;i=i+1)
+        for(i=0;i<transaction_pkg::PRODUCT_COUNT_DEFAULT;i=i+1)
         begin
             $fwrite(inventory_csv,"%0d,%0d,%0d\n", i, dut.u_inventory_manager.price_mem[i], dut.u_inventory_manager.qty_mem[i]);
         end
@@ -1780,7 +1780,7 @@ always #5 clk = ~clk;
 
         $fwrite(html_file,"<tr><th>Product ID</th><th>Price</th><th>Remaining Quantity</th><th>Status</th></tr>\n");
 
-        for(i=0; i<PRODUCT_COUNT; i=i+1)
+        for(i=0; i<transaction_pkg::PRODUCT_COUNT_DEFAULT; i=i+1)
         begin
             if(dut.u_inventory_manager.qty_mem[i] == 0)
             begin

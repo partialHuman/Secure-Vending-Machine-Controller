@@ -27,7 +27,7 @@ module transaction_controller
     //--------------------------------------------------
     // Outputs
     //--------------------------------------------------
-    output logic arbiter_ready,
+    output logic idle,
 
     // High for the whole transaction (RECEIVE_PAYMENT
     // through COMPLETE). Drives balance_manager/
@@ -389,9 +389,9 @@ assign error_code = error_reg;
 assign busy = (current_state != IDLE);
 
 //-----------------------------------------------------
-// Arbiter Ready
+// Idle
 //-----------------------------------------------------
 
-assign arbiter_ready = (current_state == IDLE);
+assign idle = (current_state == IDLE);
 
 endmodule
