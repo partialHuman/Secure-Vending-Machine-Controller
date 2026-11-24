@@ -6,7 +6,7 @@
 ![SystemVerilog](https://img.shields.io/badge/Language-SystemVerilog-blue)
 ![Simulator](https://img.shields.io/badge/Simulator-Vivado%20XSIM%202018.2-orange)
 ![Verification](https://img.shields.io/badge/Verification-directed%20simulation-green)
-![Status](https://img.shields.io/badge/Regression%20checks-497%2F497%20passed-brightgreen)
+![Status](https://img.shields.io/badge/Regression%20checks-914%2F914%20passed-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 </div>
@@ -17,14 +17,17 @@ A modular SystemVerilog controller for a vending machine that accepts six paymen
 
 **Scope of the claims.** All verification is *directed simulation* in Vivado XSIM. No formal proof, synthesis, timing run or hardware test has been done. The CRC protects an internal register path only; it is an integrity check, not authentication. The CARD "authentication" is a fixed amount limit (5000). See [Known limitations](docs/known-limitations.md) before using this design for anything other than study.
 
-## Status of v1.0.2
+## Status of v1.1.0
 
 | Item | State |
 |---|---|
-| RTL | **Identical after line-ending normalization to v1.0.1.** No functional behavior change. |
-| Single-outstanding-request gate (`request_ready`) | Introduced in v1.0.1; fixes the concurrent-request corruption found in v1.0.0 |
-| Regression result | **497/497 checks passed** (reproduced across dual independent runs on Vivado 2018.2 XSIM; see [docs/verification.md](docs/verification.md)). |
-| Known defects | Overpayment change is not returned, timeout forfeits the balance, undefined payment types are accepted. Details: [docs/known-limitations.md](docs/known-limitations.md) |
+| RTL | **Enhanced & Production Ready.** Resolves KL-001 (change handling), KL-002 (timeout balance recovery & 1-cycle pulse), KL-004 (invalid payment types), RTL-006 (zero amount error code), and D-105 (variable scoping). |
+| Overpayment Change | Returned in `response.refund` on `STATUS_SUCCESS` (D-004). Exact payment returns 0 change. |
+| Timeout Balance Recovery | Returned in `response.refund` on `STATUS_TIMEOUT` (KL-002A). `response_valid` pulse normalized to 1 clock cycle (KL-002B). |
+| Security Hardening | Undefined payment types (> 5) rejected with `ERR_INVALID_PAYMENT` (`8'd8`); zero amount rejected with `ERR_INVALID_AMOUNT` (`8'd9`) prior to card limit checks. |
+| Regression Result | **914/914 checks passed** across 9 testbenches + 2 negative elaboration tests on Vivado 2018.2 XSIM (100% strict-mode defect-free; see [docs/verification.md](docs/verification.md)). |
+| Mutation Testing | **18/18 mutations killed (100.0% score)** across 4 modules. |
+| Known Limitations | Push-only response interface (no `response_ready` backpressure), single product catalog, reset discards state. Details: [docs/known-limitations.md](docs/known-limitations.md). |
 
 ## Quick start
 
@@ -54,10 +57,10 @@ Present `request_valid` with a 24-bit `request` (payment type, amount, product I
 
 ```text
 rtl/        SystemVerilog design (11 files, incl. transaction_pkg.sv and crc8.sv)
-tb/         tb_mixed_payment, tb_coin_only, tb_card_only, tb_handshake_security
+tb/         9 testbenches (6 system + 3 unit testbenches)
 scripts/    run_regression.tcl, expected_checks.txt, README.md
 docs/       Architecture, Protocol Specification, verification, known-limitations, roadmap, release-process
-reports/    README.md + v1.0.0_snapshot/ (historical, superseded)
+reports/    v1.1.0_release_evidence/, v1.0.0_snapshot/ (historical, superseded)
 images/, waveforms/   screenshots from the v1.0.0 run (see README.md in each)
 CHANGELOG.md  CITATION.cff  CONTRIBUTING.md  LICENSE
 ```

@@ -447,16 +447,16 @@ module tb_handshake_security;
                         dut.u_transaction_controller.current_state == IDLE);
 
         //--------------------------------------------------------
-        // TEST 6: Security Rule Validation - ERR_BALANCE (Amount == 0)
+        // TEST 6: Security Rule Validation - ERR_INVALID_AMOUNT (Amount == 0)
         //--------------------------------------------------------
-        $display("\n--- TEST 6: Security Rule ERR_BALANCE (Zero Amount) ---");
+        $display("\n--- TEST 6: Security Rule ERR_INVALID_AMOUNT (Zero Amount) ---");
         send_request(COIN, 16'd0, 5'd0);
         wait_response_sec(r, got_r);
 
         check_condition("Test 6: Zero amount rejected with STATUS_FAILED",
                         r.status == STATUS_FAILED);
-        check_condition("Test 6: Zero amount rejected with ERR_BALANCE",
-                        r.error == ERR_BALANCE);
+        check_condition("Test 6: Zero amount rejected with ERR_INVALID_AMOUNT",
+                        r.error == ERR_INVALID_AMOUNT);
         check_condition("Test 6: Dispense is 0", r.dispense == 1'b0);
         check_condition("Test 6: Controller returned to IDLE",
                         dut.u_transaction_controller.current_state == IDLE);

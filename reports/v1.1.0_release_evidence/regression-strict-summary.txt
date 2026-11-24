@@ -1,0 +1,12 @@
+================ M6 STRICT_KL DEFECT ELIMINATION SUMMARY ================
+tb_unit_timeout          (rc=0) SVM_TB_RESULT: PASS total=134 passed=134 failed=0 tb_errors=0
+tb_unit_security         (rc=0) SVM_TB_RESULT: PASS total=19 passed=19 failed=0 tb_errors=0
+tb_unit_balance          (rc=0) SVM_TB_RESULT: PASS total=66 passed=66 failed=0 tb_errors=0
+tb_card_only             (rc=0) SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0
+tb_coin_only             (rc=0) SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0
+tb_handshake_security    (rc=0) SVM_TB_RESULT: PASS total=220 passed=220 failed=0 tb_errors=0
+tb_mixed_payment         (rc=0) SVM_TB_RESULT: PASS total=73 passed=73 failed=0 tb_errors=0
+=========================================================================
+TOTAL TARGETS: 7 testbenches executed with +STRICT_KL
+DEFECT OBSERVATIONS: 0 (KL-001, KL-002, KL-004, and RTL-006 completely eliminated)
+RESULT: STRICT PASS

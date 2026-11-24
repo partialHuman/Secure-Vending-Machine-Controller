@@ -1,0 +1,18 @@
+================ M6 DEFAULT REGRESSION SUMMARY ================
+tb_card_only             PASS  SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0
+tb_coin_only             PASS  SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0
+tb_handshake_security    PASS  SVM_TB_RESULT: PASS total=220 passed=220 failed=0 tb_errors=0
+tb_inventory_manager     PASS  SVM_TB_RESULT: PASS total=65 passed=65 failed=0 tb_errors=0
+tb_mixed_payment         PASS  SVM_TB_RESULT: PASS total=73 passed=73 failed=0 tb_errors=0
+tb_product_count         PASS  SVM_TB_RESULT: PASS total=133 passed=133 failed=0 tb_errors=0
+tb_unit_timeout          PASS  SVM_TB_RESULT: PASS total=134 passed=134 failed=0 tb_errors=0
+tb_unit_security         PASS  SVM_TB_RESULT: PASS total=19 passed=19 failed=0 tb_errors=0
+tb_unit_balance          PASS  SVM_TB_RESULT: PASS total=66 passed=66 failed=0 tb_errors=0
+tb_product_count_invalid_0 PASS  elaboration rejected as expected (exit 1, VRFC 10-2063)
+tb_product_count_invalid_33 PASS  elaboration rejected as expected (exit 1, VRFC 10-2063)
+===============================================================
+TOTAL TARGETS: 11 (9 testbenches + 2 negative elaboration tests)
+TOTAL CHECKS: 914
+PASSED CHECKS: 914
+FAILED CHECKS: 0
+RESULT: PASS

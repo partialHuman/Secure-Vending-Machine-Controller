@@ -10,6 +10,31 @@ Nothing yet.
 
 ---
 
+# [1.1.0] - 2026-11-24
+
+Production verification and hardening release. Resolves KL-001, KL-002, KL-004, RTL-006, and D-105.
+
+> **Verification status:** Verified on Xilinx Vivado 2018.2 / XSIM (SW Build 2258646). Full regression suite passed with **914/914 checks passed** across 9 testbenches + 2 negative elaboration tests. Mutation testing achieved **100.0% mutation score (18/18 killed)**. 100% pass rate in strict mode (`+STRICT_KL`).
+
+### Added
+- **M1 Unit Testbenches:** Added `tb/tb_unit_timeout.sv` (134 checks), `tb/tb_unit_security.sv` (19 checks), and `tb/tb_unit_balance.sv` (66 checks) providing pure port-level verification without `force`/`release`.
+- **Negative Elaboration Tests:** Integrated compilation tests verifying rejection of out-of-range `PRODUCT_COUNT` parameters (0 and 33).
+- **M6 Verification Evidence:** Added `reports/v1.1.0_release_evidence/` containing full default and strict regression logs, mutation testing matrix, and execution provenance.
+- **Protocol Error Codes:** Added `ERR_INVALID_PAYMENT` (`8'd8`) and `ERR_INVALID_AMOUNT` (`8'd9`).
+
+### Changed
+- **KL-001 (Overpayment Change):** Implemented change calculation (`current_balance - required_amount`) on `sub_en` in `rtl/balance_manager.sv`, capturing exact change into `refund_amount` while the accumulated balance is cleared, and forwarded to `response.refund` in `rtl/response_generator.sv` upon successful dispense (D-004).
+- **KL-002A (Timeout Balance Recovery):** Modified `rtl/transaction_controller.sv` to route timeouts through `REFUND` to `COMPLETE`, ensuring customer balance is captured into `response.refund` rather than forfeited.
+- **KL-002B (Response Pulse Normalization):** Normalized `response_valid` pulse width in `rtl/response_generator.sv` to strictly one clock cycle across all 10 transaction scenarios.
+- **KL-004 (Payment Type Hardening):** Added upper bound validation in `rtl/security_engine.sv` rejecting payment types > `WALLET` (`3'd5`) with `ERR_INVALID_PAYMENT` (`8'd8`) (D-008).
+- **RTL-006 (Zero Amount Disambiguation):** Replaced `ERR_BALANCE` with `ERR_INVALID_AMOUNT` (`8'd9`) for zero payment amounts in `rtl/security_engine.sv`, evaluated with precedence over card limit checks (D-009). Aligned legacy testbenches (`tb_card_only`, `tb_coin_only`, `tb_handshake_security`).
+- **D-105 (Code Hygiene & Variable Scoping):** Replaced non-blocking sequential `temp_sum` with combinational `balance_sum` in `rtl/balance_manager.sv`, eliminating intermediate arithmetic register declarations.
+- Check-count manifest `scripts/expected_checks.txt` updated to 914 total checks across 9 testbenches.
+- Updated `scripts/run_regression.tcl` to integrate unit testbenches into standard regression.
+
+
+---
+
 # [1.0.2] - 2026-10-31
 
 Evidence, documentation and test-hygiene release. **RTL is identical after line-ending normalization to v1.0.1; there is no behavior change.**

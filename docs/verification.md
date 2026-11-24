@@ -20,12 +20,18 @@ Outputs in `build/` (git-ignored): `logs/`, `reports/<testbench>/`, `PROVENANCE.
 
 | Testbench | Scope | Checks | Notes |
 |---|---|:---:|---|
-| `tb_mixed_payment` | Six payment types, duplicate, CRC corruption, stock depletion, contention (13A-E), forced timeout; writes CSV/HTML/log reports | 73 | Duplicate, CRC and timeout use `force` (white-box) |
-| `tb_coin_only` | Coin channel: reset, exact/insufficient/over/zero payment, invalid product, stock, stress | 102 | Near-duplicate of `tb_card_only` (differs by payment type); overpayment test is labelled KL-001 |
-| `tb_card_only` | Card channel, same structure | 102 | `ERR_AUTH` is covered in `tb_handshake_security` |
-| `tb_handshake_security` | Reset gating, contention (hold a second request while the first runs), `ERR_AUTH`, `ERR_INVALID_PRODUCT`, zero amount, mid-transaction reset, reset sweep (Test 8: 28 checks), boundary values (Test 9: 126 checks), known-limitation observations (Test 10: 7 checks) | 220 | All stimulus through public ports; internal signals read only for preconditions/state checks |
+| `tb_mixed_payment` | Six payment types, duplicate, CRC corruption, stock depletion, contention (13A-E), timeout; writes CSV/HTML/log reports | 73 | System-level integration regression |
+| `tb_coin_only` | Coin channel: reset, exact/insufficient/over/zero payment, invalid product, stock, stress | 102 | Overpayment change verified (D-004) |
+| `tb_card_only` | Card channel, same structure | 102 | `ERR_AUTH` covered; zero-amount verified with `ERR_INVALID_AMOUNT` |
+| `tb_handshake_security` | Reset gating, contention, `ERR_AUTH`, `ERR_INVALID_PRODUCT`, zero amount (`ERR_INVALID_AMOUNT`), mid-reset, reset sweep, boundary values | 220 | Public ports; Option A handshake verified |
+| `tb_inventory_manager` | Inventory table pricing, decrementing, stock exhaustion, bounds checks | 65 | Unit verification for inventory module |
+| `tb_product_count` | Dynamic parameterized product catalog range validation (1..32) | 133 | Validates catalog sizing invariants |
+| `tb_unit_timeout` | Comprehensive timeout recovery (KL-002A), 1-cycle pulse monitor (KL-002B), boundary state coverage, duplicate-refund prevention | 134 | 10 operational and error scenarios with cycle-accurate pulse monitor |
+| `tb_unit_security` | Direct stimulus of security engine: CRC-8 corruption, duplicate token, zero-amount precedence, payment types 6/7 rejection | 19 | Pure port-level unit verification eliminating `force` |
+| `tb_unit_balance` | Balance accumulation, overflow saturation, change subtraction (D-004), timeout refund, clearing precedence | 66 | Unit verification for balance manager |
 
-Total checks across all four testbenches: **497 checks**.
+Total checks across all 9 testbenches: **914 checks**.
+In addition, 2 negative elaboration tests (`tb_product_count_invalid_0` and `tb_product_count_invalid_33`) verify compilation rejection (`VRFC 10-2063`).
 
 Check counts per testbench are specified by the release manifest `scripts/expected_checks.txt`. The v1.0.1 release reported 69 / 101 / 101 / 56 (327 total); v1.0.2 added tests and monitors, increasing the verified check count to 497.
 
@@ -72,7 +78,9 @@ The table below distinguishes the release manifest candidate (`scripts/expected_
 |---|---|---|---|
 | v1.0.0 | Author (Vivado GUI) | 44/44 checks | Historical snapshot kept in `reports/v1.0.0_snapshot/` |
 | v1.0.1 | Maintainer (Vivado 2018.2) | 327/327 checks | Historical release baseline (superseded) |
-| v1.0.2 | Directed regression (Vivado 2018.2 XSIM) | **497/497 checks passed** (reproduced across independent runs) | Defined in release manifest candidate (`scripts/expected_checks.txt`); raw logs generated in local `build/` |
+| v1.0.2 | Directed regression (Vivado 2018.2 XSIM) | 497/497 checks passed | Historical release baseline (superseded) |
+| v1.0.3 | Directed regression (Vivado 2018.2 XSIM) | 695/695 checks passed | Baseline parity gate (M0) |
+| v1.1.0 | Full regression suite (Vivado 2018.2 XSIM) | **914/914 checks passed** (9 testbenches + 2 negative elabs) | Complete evidence in `reports/v1.1.0_release_evidence/` |
 
 ### v1.0.2 Provenance Record
 
@@ -91,3 +99,27 @@ Summary SHA-256: 199e7b0885a890f2ea91337ec36feae5290e2c609522db600f741b8bc186c0a
 ```
 
 Historical v1.0.0 reports (44 checks) are kept in `reports/v1.0.0_snapshot/` with a list of their known defects.
+
+## 10. Mutation Testing Campaign (v1.1.0)
+
+A comprehensive 18-mutation fault injection campaign was conducted across all modified RTL modules to verify fault detection sensitivity:
+
+- **Total Mutations:** 18
+- **Killed Mutations:** 18
+- **Survived Mutations:** 0
+- **Mutation Score:** **100.0%**
+
+| Category | Module | Mutations | Killed | Score |
+|---|---|:---:|:---:|:---:|
+| Balance Manager | `balance_manager.sv` | 5 | 5 | 100.0% |
+| Security Engine | `security_engine.sv` | 5 | 5 | 100.0% |
+| Transaction Controller | `transaction_controller.sv` | 4 | 4 | 100.0% |
+| Response Generator | `response_generator.sv` | 4 | 4 | 100.0% |
+| **Total** | | **18** | **18** | **100.0%** |
+
+Full mutation descriptions, injection targets, and killer testbenches are cataloged in `reports/v1.1.0_release_evidence/mutation-testing-matrix.md`.
+
+## 11. Simulator Environment & Limitations
+
+- **Simulator:** Xilinx Vivado 2018.2 / XSIM (SW Build 2258646).
+- **SystemVerilog Assertions (SVA) Limitation:** Vivado 2018.2 XSIM emits `WARNING: [XSIM 43-4127] System Verilog Property Declaration is not supported yet for simulation. The statement will be ignored.` when encountering `assert property`. Consequently, protocol invariant verification (e.g., single-pulse `response_valid` width, request-response conservation) is implemented using cycle-accurate procedural always-block checkers and testbench pulse monitors (`verify_and_monitor_resp`).

@@ -1,0 +1,22 @@
+Tool: Vivado 2018.2 / XSIM (SW Build 2258646)
+OS:   Microsoft Windows 11 Pro (10.0.26300, 64-bit) / pwsh 7
+Git Branch: docs/release-readiness
+Git Baseline Commit: 9dd3e511a414f2004ae8ee91dffcf63465a6e528 (Release v1.0.3)
+Date: 2026-11-24
+
+Regression Summary:
+tb_card_only             PASS  SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0
+tb_coin_only             PASS  SVM_TB_RESULT: PASS total=102 passed=102 failed=0 tb_errors=0
+tb_handshake_security    PASS  SVM_TB_RESULT: PASS total=220 passed=220 failed=0 tb_errors=0
+tb_inventory_manager     PASS  SVM_TB_RESULT: PASS total=65 passed=65 failed=0 tb_errors=0
+tb_mixed_payment         PASS  SVM_TB_RESULT: PASS total=73 passed=73 failed=0 tb_errors=0
+tb_product_count         PASS  SVM_TB_RESULT: PASS total=133 passed=133 failed=0 tb_errors=0
+tb_unit_timeout          PASS  SVM_TB_RESULT: PASS total=134 passed=134 failed=0 tb_errors=0
+tb_unit_security         PASS  SVM_TB_RESULT: PASS total=19 passed=19 failed=0 tb_errors=0
+tb_unit_balance          PASS  SVM_TB_RESULT: PASS total=66 passed=66 failed=0 tb_errors=0
+tb_product_count_invalid_0 PASS  elaboration rejected as expected (exit 1, VRFC 10-2063)
+tb_product_count_invalid_33 PASS  elaboration rejected as expected (exit 1, VRFC 10-2063)
+
+TOTAL CHECKS: 914 / 914 passed (100%)
+STRICT_KL DEFECT ELIMINATION: 0 defects observed across all monitored testbenches
+MUTATION TESTING SCORE: 100.0% (18/18 killed)
