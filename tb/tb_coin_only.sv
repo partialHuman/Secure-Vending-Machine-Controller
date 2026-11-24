@@ -659,11 +659,11 @@ task send_coin
         wait_response();
     
         check_result(
-            "Over Payment (KL-001: change not returned)",
+            "Over Payment",
             STATUS_SUCCESS,
             ERR_NONE,
             1,
-            16'd0
+            16'd20
         );
     
         //------------------------------------------------------------
@@ -677,7 +677,7 @@ task send_coin
         check_result(
             "Zero Coin",
             STATUS_FAILED,
-            ERR_BALANCE,
+            ERR_INVALID_AMOUNT,
             0,
             16'd0
         );
@@ -888,7 +888,7 @@ task send_coin
             STATUS_TIMEOUT,
             ERR_TIMEOUT,
             0,
-            0
+            16'd10
         );
     
         //------------------------------------------------------------

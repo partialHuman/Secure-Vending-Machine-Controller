@@ -78,7 +78,9 @@ package transaction_pkg;
         ERR_AUTH,
         ERR_BALANCE,
         ERR_STOCK,
-        ERR_DUPLICATE
+        ERR_DUPLICATE,
+        ERR_INVALID_PAYMENT = 8'd8,
+        ERR_INVALID_AMOUNT  = 8'd9
     } error_t;
 
     //============================================================

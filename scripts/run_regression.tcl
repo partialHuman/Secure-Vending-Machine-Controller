@@ -37,7 +37,7 @@ set rtl_files {
     security_engine.sv timeout_controller.sv balance_manager.sv
     inventory_manager.sv transaction_controller.sv response_generator.sv top.sv
 }
-set valid_tbs {tb_mixed_payment tb_coin_only tb_card_only tb_handshake_security tb_inventory_manager tb_product_count}
+set valid_tbs {tb_mixed_payment tb_coin_only tb_card_only tb_handshake_security tb_inventory_manager tb_product_count tb_unit_timeout tb_unit_security tb_unit_balance}
 if {[info exists ::env(SVM_TBS)]} {
     set tbs $::env(SVM_TBS)
 } else {

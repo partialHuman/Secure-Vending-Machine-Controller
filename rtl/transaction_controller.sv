@@ -78,6 +78,7 @@ error_t  error_reg;
 
 logic   sec_ok_latched;
 error_t sec_err_latched;
+logic   timeout_latched;
 
 //-----------------------------------------------------
 // State Register
@@ -114,7 +115,10 @@ begin
 
         RECEIVE_PAYMENT:
         begin
-            next_state = AUTHENTICATE;
+            if(timeout || timeout_latched)
+                next_state = REFUND;
+            else
+                next_state = AUTHENTICATE;
         end
 
         //-------------------------------------------------
@@ -122,8 +126,8 @@ begin
         AUTHENTICATE:
         begin
 
-            if(timeout)
-                next_state = COMPLETE;
+            if(timeout || timeout_latched)
+                next_state = REFUND;
 
             else if(!sec_ok_latched)
                 next_state = COMPLETE;
@@ -138,8 +142,8 @@ begin
         CHECK_BALANCE:
         begin
 
-            if(timeout)
-                next_state = COMPLETE;
+            if(timeout || timeout_latched)
+                next_state = REFUND;
 
             else if(balance_ok)
                 next_state = CHECK_INVENTORY;
@@ -154,8 +158,8 @@ begin
         CHECK_INVENTORY:
         begin
 
-            if(timeout)
-                next_state = COMPLETE;
+            if(timeout || timeout_latched)
+                next_state = REFUND;
 
             else if(stock_ok)
                 next_state = DISPENSE;
@@ -208,24 +212,9 @@ begin
 
         sec_ok_latched  <= 1'b0;
         sec_err_latched <= ERR_NONE;
+        timeout_latched <= 1'b0;
 
     end
-    //-------------------------------------------------
-    // Highest Priority : Timeout
-    //-------------------------------------------------
-
-    else if(timeout)
-    begin
-
-        dispense_reg <= 1'b0;
-        refund_reg   <= 1'b0;
-        complete_reg <= 1'b1;
-
-        status_reg   <= STATUS_TIMEOUT;
-        error_reg    <= ERR_TIMEOUT;
-
-    end
-
     else
     begin
 
@@ -237,6 +226,9 @@ begin
         refund_reg   <= 1'b0;
         complete_reg <= 1'b0;
 
+        if (timeout)
+            timeout_latched <= 1'b1;
+
         case(current_state)
 
             //-------------------------------------------------
@@ -246,6 +238,7 @@ begin
 
                 status_reg <= STATUS_IDLE;
                 error_reg  <= ERR_NONE;
+                timeout_latched <= 1'b0;
 
                 if(security_done)
                 begin
@@ -346,13 +339,21 @@ begin
 
                 refund_reg <= 1'b1;
 
-                status_reg <= STATUS_FAILED;
-                if(!balance_ok)
-                    error_reg <= ERR_BALANCE;
-                else if(!stock_ok)
-                    error_reg <= ERR_STOCK;
+                if (timeout || timeout_latched)
+                begin
+                    status_reg <= STATUS_TIMEOUT;
+                    error_reg  <= ERR_TIMEOUT;
+                end
                 else
-                    error_reg <= ERR_NONE;
+                begin
+                    status_reg <= STATUS_FAILED;
+                    if(!balance_ok)
+                        error_reg <= ERR_BALANCE;
+                    else if(!stock_ok)
+                        error_reg <= ERR_STOCK;
+                    else
+                        error_reg <= ERR_NONE;
+                end
 
             end
 

@@ -140,14 +140,26 @@ begin
             end
 
             //------------------------------------------------
-            // Invalid Amount
+            // Invalid Payment Type (KL-004)
+            //------------------------------------------------
+
+            else if(packet.payment_type > WALLET)
+            begin
+
+                security_ok    <= 1'b0;
+                security_error <= ERR_INVALID_PAYMENT;
+
+            end
+
+            //------------------------------------------------
+            // Invalid Amount (RTL-006)
             //------------------------------------------------
 
             else if(packet.amount == 16'd0)
             begin
 
                 security_ok    <= 1'b0;
-                security_error <= ERR_BALANCE;
+                security_error <= ERR_INVALID_AMOUNT;
 
             end
 

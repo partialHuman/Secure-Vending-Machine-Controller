@@ -36,7 +36,8 @@ module balance_manager #(
     output logic                     underflow
 );
 
-logic [BALANCE_WIDTH:0] temp_sum;
+logic [BALANCE_WIDTH:0] balance_sum;
+assign balance_sum = current_balance + amount_in;
 
 //-----------------------------------------------------
 // Balance Management
@@ -95,15 +96,13 @@ begin
         else if (add_en)
         begin
 
-            temp_sum = current_balance + amount_in;
-
-            if (temp_sum[BALANCE_WIDTH])
+            if (balance_sum[BALANCE_WIDTH])
             begin
                 overflow <= 1'b1;
             end
             else
             begin
-                current_balance <= temp_sum[BALANCE_WIDTH-1:0];
+                current_balance <= balance_sum[BALANCE_WIDTH-1:0];
             end
 
         end
@@ -117,7 +116,8 @@ begin
 
             if (current_balance >= required_amount)
             begin
-                current_balance <= current_balance - required_amount;
+                refund_amount   <= current_balance - required_amount;
+                current_balance <= '0;
             end
             else
             begin

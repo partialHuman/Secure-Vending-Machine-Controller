@@ -2,7 +2,7 @@
 
 ## Secure Vending Machine Controller
 
-Version: 1.0.2 (documentation corrected against the RTL; RTL identical to v1.0.1)
+Version: 1.1.0 (Production Release — Enhanced Protocol & Error Disambiguation)
 
 ---
 
@@ -136,7 +136,7 @@ typedef struct packed
 |---|---|
 | `status` | Overall transaction outcome (`STATUS_SUCCESS`, `STATUS_FAILED`, `STATUS_TIMEOUT`) |
 | `error` | Diagnostic error code (`ERR_NONE`, `ERR_BALANCE`, `ERR_STOCK`, `ERR_AUTH`, etc.) |
-| `refund` | Amount returned to the customer. In v1.0.x it is non-zero only when a purchase is refused **after** the balance was loaded (`ERR_BALANCE` insufficient balance, `ERR_STOCK`); it is `0` on a successful purchase **even if the customer overpaid** (KL-001), on a timeout (KL-002) and when the request was rejected by the security engine. |
+| `refund` | Amount returned to the customer (Decision D-004). Carries overpayment change (`amount - price`) on `STATUS_SUCCESS`, full tendered refund on `STATUS_FAILED` (`ERR_BALANCE`, `ERR_STOCK`), and accumulated refund on `STATUS_TIMEOUT`. Set to `0` on exact payment or immediate rejection. |
 | `dispense` | Dispense actuator trigger (`1` = product dispensed, `0` = no dispense) |
 
 ---
@@ -146,9 +146,9 @@ typedef struct packed
 ### Status Codes (`status_t`)
 - `STATUS_IDLE` (`4'd0`): Controller is idle.
 - `STATUS_BUSY` (`4'd1`): Transaction in progress.
-- `STATUS_SUCCESS` (`4'd2`): Product dispensed successfully; the balance is cleared, so any amount above the price is **not** returned (KL-001).
-- `STATUS_FAILED` (`4'd3`): Transaction rejected or resource check failed.
-- `STATUS_TIMEOUT` (`4'd4`): Transaction timed out. The balance is cleared and **no refund is generated** (KL-002). The timer cannot expire through the public interface in v1.0.x because the FSM always advances (the timer starts when the security engine accepts the payment and the FSM completes about 7 clocks later, against a 20-clock timer); tests reach this state only by forcing the FSM.
+- `STATUS_SUCCESS` (`4'd2`): Product dispensed successfully (`dispense = 1`). In v1.1.0 (D-004), any overpayment amount is returned as change in `response.refund`. Exact payment returns change `0`.
+- `STATUS_FAILED` (`4'd3`): Transaction rejected or resource check failed (`dispense = 0`). Tendered funds are refunded in `response.refund` if payment was accepted before failure.
+- `STATUS_TIMEOUT` (`4'd4`): Transaction timed out (`dispense = 0`). In v1.1.0 (KL-002A), all accumulated customer funds are returned via `response.refund`. `response_valid` is guaranteed to pulse for exactly one clock cycle (KL-002B).
 - `STATUS_CANCELLED` (`4'd5`): Transaction aborted.
 
 ### Error Codes (`error_t`)

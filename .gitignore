@@ -98,6 +98,10 @@ __pycache__/
 
 reports/archive/
 
+# Historical snapshot kept on purpose
+!reports/v1.0.0_snapshot/
+!reports/v1.0.0_snapshot/*
+
 ########################################################
 # Keep Important Generated Reports
 ########################################################
@@ -105,6 +109,7 @@ reports/archive/
 !reports/*.csv
 !reports/*.html
 !reports/*.log
+!reports/**/*.log
 
 ########################################################
 # Keep Documentation

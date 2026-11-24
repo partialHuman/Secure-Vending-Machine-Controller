@@ -60,7 +60,7 @@ begin
             response_reg.status    <= status;
             response_reg.error     <= error_code;
             response_reg.dispense  <= dispense_latched;
-            response_reg.refund    <= refund_latched ? refund_amount : '0;
+            response_reg.refund    <= (dispense_latched || refund_latched) ? refund_amount : '0;
 
             response_valid <= 1'b1;
 
